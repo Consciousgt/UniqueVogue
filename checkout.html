@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout — Unified Vogue</title>
+  <meta name="description" content="Complete your fashion order at Unified Vogue with direct bank transfer payment."/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="topbar">
+    <i class="fa-solid fa-lock"></i>&nbsp; Secure Checkout &nbsp;·&nbsp; Direct Bank Transfer &nbsp;<i class="fa-solid fa-shield-halved"></i>
+  </div>
+
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="images/logo.jpg" alt="Unified Vogue Logo" onerror="this.style.display='none'" />
+        <div class="nav-brand-text">
+          <span class="nav-brand-name serif">Unified Vogue</span>
+          <span class="nav-brand-tag">Your Outfits Speaks Fashion</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="cart.html">← Back to Bag</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Checkout Container -->
+  <div class="container co-wrap">
+    <div class="co-head">
+      <h1 class="serif">Complete Your Order</h1>
+      <p>Fill in your shipping address and complete your bank transfer payment</p>
+    </div>
+
+    <form id="checkoutForm" onsubmit="handleCheckoutSubmit(event)">
+      <div class="co-grid">
+
+        <!-- Left: Shipping & Payment Details -->
+        <div>
+          <!-- Shipping Section -->
+          <div class="co-section">
+            <div class="co-section-title">
+              <i class="fa-solid fa-location-dot"></i> 1. Shipping Information
+            </div>
+
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="custName" class="form-ctrl" placeholder="e.g. Angela Johnson" required />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone / WhatsApp Number *</label>
+                <input type="tel" id="custPhone" class="form-ctrl" placeholder="e.g. 07044027511" required />
+              </div>
+              <div class="form-group">
+                <label>State / Delivery City *</label>
+                <input type="text" id="custCity" class="form-ctrl" placeholder="e.g. Lagos / Abuja" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Full Delivery Address *</label>
+              <textarea id="custAddress" class="form-ctrl" rows="3" placeholder="House number, street address, landmark..." required></textarea>
+            </div>
+          </div>
+
+          <!-- Bank Account Details Section -->
+          <div class="co-section">
+            <div class="co-section-title">
+              <i class="fa-solid fa-building-columns"></i> 2. Bank Payment Account
+            </div>
+
+            <div class="bank-box">
+              <div class="bank-box-head">
+                <i class="fa-solid fa-shield-check"></i> Official Unified Vogue Payment Account
+              </div>
+
+              <div class="bank-row">
+                <span class="bank-lbl">Bank Name</span>
+                <span class="bank-val">Opay</span>
+              </div>
+              <div class="bank-row">
+                <span class="bank-lbl">Account Name</span>
+                <span class="bank-val">Chioma Peace Okafor</span>
+              </div>
+              <div class="bank-row">
+                <span class="bank-lbl">Account Number</span>
+                <span class="bank-val">
+                  <strong id="accNum">7044027511</strong>
+                  <button type="button" class="copy-btn" onclick="App.copyToClipboard('7044027511')">
+                    <i class="fa-regular fa-copy"></i> Copy
+                  </button>
+                </span>
+              </div>
+            </div>
+
+            <div class="bank-notice">
+              <i class="fa-solid fa-circle-info" style="color:var(--gold); margin-right:6px;"></i>
+              Please transfer the exact order total into the Opay account above, then click <strong>"Confirm &amp; Send WhatsApp Receipt"</strong> below.
+            </div>
+
+            <button type="submit" class="wa-btn">
+              <i class="fa-brands fa-whatsapp"></i>
+              Confirm Order &amp; Send WhatsApp Receipt
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Order Summary Card -->
+        <div>
+          <div class="co-summary">
+            <div class="co-summary-title">Order Summary</div>
+
+            <div id="coItemsList">
+              <!-- JS Injected -->
+            </div>
+
+            <div class="co-div"></div>
+
+            <div class="co-row">
+              <span>Items Subtotal</span>
+              <span id="coSubtotal">₦0</span>
+            </div>
+            <div class="co-row">
+              <span>Express Delivery</span>
+              <span id="coDelivery">₦3,500</span>
+            </div>
+
+            <div class="co-div"></div>
+
+            <div class="co-row co-total">
+              <span>Total Amount</span>
+              <span id="coTotal">₦0</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>&copy; 2025 Unified Vogue. All Rights Reserved.</span>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/checkout.js"></script>
+
+  <script>
+    const DELIVERY_FEE = 3500;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cart = CartManager.getCart();
+      if (cart.length === 0) {
+        window.location.href = 'cart.html';
+        return;
+      }
+
+      const listEl = document.getElementById('coItemsList');
+      let subtotal = 0;
+
+      listEl.innerHTML = cart.map(item => {
+        const itemTot = item.price * item.qty;
+        subtotal += itemTot;
+        return `
+          <div class="co-item">
+            <img src="${item.image}" alt="${item.name}" onerror="this.src='images/logo.jpg'" />
+            <div class="co-item-info">
+              <div class="co-item-name">${item.name}</div>
+              <div class="co-item-meta">Size: ${item.size} · Qty: ${item.qty}</div>
+            </div>
+            <div class="co-item-price">${App.formatMoney(itemTot)}</div>
+          </div>
+        `;
+      }).join('');
+
+      const delivery = subtotal >= 30000 ? 0 : DELIVERY_FEE;
+      document.getElementById('coSubtotal').textContent = App.formatMoney(subtotal);
+      document.getElementById('coDelivery').textContent = delivery === 0 ? 'FREE' : App.formatMoney(delivery);
+      document.getElementById('coTotal').textContent = App.formatMoney(subtotal + delivery);
+    });
+
+    function handleCheckoutSubmit(e) {
+      e.preventDefault();
+      const formData = {
+        name: document.getElementById('custName').value.trim(),
+        phone: document.getElementById('custPhone').value.trim(),
+        city: document.getElementById('custCity').value.trim(),
+        address: document.getElementById('custAddress').value.trim()
+      };
+      CheckoutManager.submitOrder(formData);
+    }
+  </script>
+</body>
+</html>

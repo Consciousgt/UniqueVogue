@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shop Collection — Unified Vogue</title>
+  <meta name="description" content="Browse our luxury collection of Vintage Shirts and Knit Shirts at Unified Vogue."/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="topbar">
+    <i class="fa-solid fa-star"></i>&nbsp; Free Nationwide Delivery on Orders Over ₦30,000 &nbsp;<i class="fa-solid fa-star"></i>
+  </div>
+
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="images/logo.jpg" alt="Unified Vogue Logo" onerror="this.style.display='none'" />
+        <div class="nav-brand-text">
+          <span class="nav-brand-name serif">Unified Vogue</span>
+          <span class="nav-brand-tag">Your Outfits Speaks Fashion</span>
+        </div>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
+        <li><a href="index.html#contactSection">Contact</a></li>
+        <span class="nav-close" id="navClose"><i class="fa-solid fa-xmark"></i></span>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="cart.html" class="nav-icon" title="Shopping Bag">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="nav-badge" id="navCartBadge">0</span>
+        </a>
+        <button class="nav-toggle" id="navToggle"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Shop Header -->
+  <div class="shop-header">
+    <div class="container">
+      <span class="section-eyebrow">Unified Vogue</span>
+      <h1 class="serif">Full Catalog</h1>
+      <p>Explore high-fashion open-knit shirts and bespoke graphic vintage shirts.</p>
+    </div>
+  </div>
+
+  <!-- Shop Body -->
+  <div class="container shop-body">
+    <div class="shop-bar">
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="shopSearchInput" placeholder="Search catalog..." autocomplete="off" />
+      </div>
+      <div class="bar-right">
+        <span class="results-label" id="resultsCount">Loading...</span>
+        <select class="sort-sel" id="sortSelect">
+          <option value="featured">Sort: Featured</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="prod-grid" id="shopProductsGrid">
+      <!-- JS injected -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <span>&copy; 2025 Unified Vogue. All Rights Reserved.</span>
+        <a href="index.html" style="color:var(--gold);">← Back to Home</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+
+  <script>
+    function renderProducts() {
+      const query = document.getElementById('shopSearchInput').value.toLowerCase().trim();
+      const sortVal = document.getElementById('sortSelect').value;
+      let products = ProductsAPI.getProducts();
+
+      if (query) {
+        products = products.filter(p =>
+          p.name.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          (p.description && p.description.toLowerCase().includes(query))
+        );
+      }
+
+      if (sortVal === 'price-asc') products.sort((a, b) => a.price - b.price);
+      if (sortVal === 'price-desc') products.sort((a, b) => b.price - a.price);
+
+      const grid = document.getElementById('shopProductsGrid');
+      const count = document.getElementById('resultsCount');
+      count.textContent = `${products.length} item${products.length !== 1 ? 's' : ''} available`;
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div class="empty">
+            <i class="fa-regular fa-face-sad-tear"></i>
+            <h3 class="serif">No products found</h3>
+            <p>Try searching for "knit" or "vintage"</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = products.map(p => `
+        <div class="prod-card">
+          <div class="prod-thumb">
+            <span class="badge">${p.badge || 'Available'}</span>
+            <img src="${p.image}" alt="${p.name}" loading="lazy" />
+          </div>
+          <div class="prod-body">
+            <span class="prod-cat">${p.category}</span>
+            <h3 class="prod-name">${p.name}</h3>
+            <div class="prod-price">${App.formatMoney(p.price)}</div>
+            <div class="prod-actions">
+              <a href="product.html?id=${p.id}" class="btn btn-outline">Details</a>
+              <button class="btn btn-gold" onclick="CartManager.addToCart('${p.id}')">
+                <i class="fa-solid fa-bag-shopping"></i> Add
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('shopSearchInput').addEventListener('input', renderProducts);
+      document.getElementById('sortSelect').addEventListener('change', renderProducts);
+
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      const close = document.getElementById('navClose');
+      if (toggle && links) {
+        toggle.addEventListener('click', () => links.classList.add('open'));
+        if (close) close.addEventListener('click', () => links.classList.remove('open'));
+      }
+
+      renderProducts();
+    });
+  </script>
+</body>
+</html>

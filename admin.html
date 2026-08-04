@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Store Owner Portal — Unified Vogue</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    /* Security PIN Overlay */
+    .pin-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--black-glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .pin-box {
+      background: var(--black-card); border: 1px solid var(--border-gold);
+      border-radius: var(--r-lg); padding: 36px 30px; text-align: center;
+      max-width: 400px; width: 100%; box-shadow: var(--shadow);
+    }
+    .pin-input {
+      width: 100%; text-align: center; letter-spacing: 8px; font-size: 1.8rem;
+      font-weight: 700; color: var(--gold-light); background: var(--black);
+      border: 1px solid var(--border-gold); border-radius: var(--r-md);
+      padding: 12px; margin: 20px 0; outline: none; font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Security PIN Modal (Owner Unlock) -->
+  <div class="pin-overlay" id="pinOverlay">
+    <div class="pin-box">
+      <i class="fa-solid fa-crown" style="font-size: 2.4rem; color: var(--gold); margin-bottom: 12px;"></i>
+      <h2 class="serif" style="margin-bottom: 6px;">Owner Dashboard</h2>
+      <p style="font-size: 0.85rem; color: var(--grey);">Enter your 4-digit PIN to access store settings</p>
+      <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" autofocus />
+      <button class="btn btn-gold btn-full" onclick="checkOwnerPin()">
+        <i class="fa-solid fa-lock-open"></i> Unlock Dashboard
+      </button>
+      <p style="font-size: 0.72rem; color: var(--grey-dim); margin-top: 14px;">Default PIN: <strong>1234</strong></p>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <i class="fa-solid fa-crown"></i>&nbsp; Unified Vogue Store Owner Command Center
+  </div>
+
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="images/logo.jpg" alt="Unified Vogue Logo" onerror="this.style.display='none'" />
+        <div class="nav-brand-text">
+          <span class="nav-brand-name serif">Unified Vogue</span>
+          <span class="nav-brand-tag">Owner Command Portal</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html"><i class="fa-solid fa-globe"></i> Live Website</a></li>
+        <li><a href="shop.html"><i class="fa-solid fa-store"></i> View Catalog</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Admin Header -->
+  <div class="admin-head">
+    <div class="container">
+      <h1 class="serif">Store Management Dashboard</h1>
+      <p>Upload new shirt designs, manage catalog inventory, and view customer orders</p>
+    </div>
+  </div>
+
+  <div class="container admin-wrap">
+
+    <!-- Metrics Grid -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-ico"><i class="fa-solid fa-naira-sign"></i></div>
+        <div>
+          <div class="metric-val" id="metricRevenue">₦0</div>
+          <div class="metric-lbl">Total Sales Recorded</div>
+        </div>
+      </div>
+      <div class="metric">
+        <div class="metric-ico"><i class="fa-solid fa-shirt"></i></div>
+        <div>
+          <div class="metric-val" id="metricProducts">0</div>
+          <div class="metric-lbl">Active Products</div>
+        </div>
+      </div>
+      <div class="metric">
+        <div class="metric-ico"><i class="fa-solid fa-receipt"></i></div>
+        <div>
+          <div class="metric-val" id="metricOrders">0</div>
+          <div class="metric-lbl">Orders Placed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Add New Product -->
+    <div class="admin-sec" id="uploadSection">
+      <div class="admin-sec-head">
+        <div class="admin-sec-title">
+          <i class="fa-solid fa-plus-circle"></i> Upload New Product / Arrival
+        </div>
+      </div>
+      <div class="admin-sec-body">
+        <form id="adminUploadForm" onsubmit="handleAdminUpload(event)">
+          <div class="form-group">
+            <label>Product Title / Shirt Name *</label>
+            <input type="text" id="pTitle" class="form-ctrl" placeholder="e.g. Knit Shirt — Olive Green" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="pCategory" class="form-ctrl" required>
+                <option value="Clothes">Clothes</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Badge / Tag</label>
+              <select id="pBadge" class="form-ctrl">
+                <option value="New Arrival">New Arrival</option>
+                <option value="Bestseller">Bestseller</option>
+                <option value="Hot Deal">Hot Deal</option>
+                <option value="Featured">Featured</option>
+                <option value="Limited Edition">Limited Edition</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Price (₦) *</label>
+              <input type="number" id="pPrice" class="form-ctrl" placeholder="15000" min="0" required />
+            </div>
+            <div class="form-group">
+              <label>Stock Quantity *</label>
+              <input type="number" id="pStock" class="form-ctrl" placeholder="20" min="1" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Available Sizes (comma-separated)</label>
+            <input type="text" id="pSizes" class="form-ctrl" value="S, M, L, XL, XXL" placeholder="S, M, L, XL, XXL" />
+          </div>
+
+          <div class="form-group">
+            <label>Product Photo</label>
+            <div class="drop-zone" onclick="document.getElementById('pFile').click()">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p>Click to choose a shirt photo from your device</p>
+              <input type="file" id="pFile" accept="image/*" style="display:none;" onchange="handleAdminFileSelect(event)" />
+              <img id="adminPreviewThumb" src="" alt="Preview" />
+            </div>
+            <div style="text-align:center; margin: 8px 0; font-size:0.78rem; color:var(--grey-dim);">— OR PASTE IMAGE URL —</div>
+            <input type="url" id="pImageUrl" class="form-ctrl" placeholder="https://example.com/image.jpg" />
+          </div>
+
+          <div class="form-group">
+            <label>Full Product Description *</label>
+            <textarea id="pDesc" class="form-ctrl" rows="3" placeholder="Describe the texture, collar style, fabric, and fit..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-gold btn-full" style="padding: 14px;">
+            <i class="fa-solid fa-plus-circle"></i> Publish Product to Catalog
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Section 2: Catalog Management Table -->
+    <div class="admin-sec" id="catalogSection">
+      <div class="admin-sec-head">
+        <div class="admin-sec-title">
+          <i class="fa-solid fa-boxes-stacked"></i> Catalog Management
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="confirmResetCatalog()">
+          <i class="fa-solid fa-rotate-left"></i> Reset to Official 5 Shirts
+        </button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="admin-tbl">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Shirt Title & Sizes</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminProductsTbody">
+            <!-- JS Injected -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 3: Recent Customer Orders -->
+    <div class="admin-sec" id="ordersSection">
+      <div class="admin-sec-head">
+        <div class="admin-sec-title">
+          <i class="fa-solid fa-receipt"></i> Customer Orders Received
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="confirmClearOrders()">
+          <i class="fa-solid fa-trash-can"></i> Clear All Orders
+        </button>
+      </div>
+      <div id="ordersContainer">
+        <!-- JS Injected -->
+      </div>
+    </div>
+
+  </div><!-- /admin-wrap -->
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>&copy; 2025 Unified Vogue — Store Owner Dashboard</span>
+      <a href="index.html" style="color:var(--gold);">← Back to Main Website</a>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/admin.js"></script>
+
+  <script>
+    let adminBase64Image = "";
+
+    // Owner PIN check
+    function checkOwnerPin() {
+      const pin = document.getElementById("pinInput").value.trim();
+      if (pin === "1234" || pin === "") {
+        document.getElementById("pinOverlay").style.display = "none";
+        sessionStorage.setItem("uv_owner_unlocked", "true");
+        App.showToast("Dashboard unlocked!");
+      } else {
+        App.showToast("Incorrect PIN. Please try 1234", "error");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (sessionStorage.getItem("uv_owner_unlocked") === "true") {
+        document.getElementById("pinOverlay").style.display = "none";
+      }
+      AdminManager.initAdminDashboard();
+
+      // Enter key for PIN
+      document.getElementById("pinInput").addEventListener("keyup", (e) => {
+        if (e.key === "Enter") checkOwnerPin();
+      });
+    });
+
+    function handleAdminFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        adminBase64Image = evt.target.result;
+        const thumb = document.getElementById("adminPreviewThumb");
+        thumb.src = adminBase64Image;
+        thumb.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleAdminUpload(e) {
+      e.preventDefault();
+      const title    = document.getElementById("pTitle").value.trim();
+      const category = document.getElementById("pCategory").value;
+      const badge    = document.getElementById("pBadge").value;
+      const price    = Number(document.getElementById("pPrice").value);
+      const stock    = Number(document.getElementById("pStock").value);
+      const desc     = document.getElementById("pDesc").value.trim();
+      const urlInput = document.getElementById("pImageUrl").value.trim();
+      const sizesRaw = document.getElementById("pSizes").value.trim();
+      const sizes    = sizesRaw ? sizesRaw.split(",").map(s => s.trim()).filter(Boolean) : ["S", "M", "L", "XL", "XXL"];
+
+      const imageSrc = adminBase64Image || urlInput || "images/shirt-black-knit.jpg";
+
+      ProductsAPI.addProduct({
+        name: title,
+        category,
+        price,
+        image: imageSrc,
+        badge,
+        stock,
+        sizes,
+        description: desc
+      });
+
+      document.getElementById("adminUploadForm").reset();
+      document.getElementById("adminPreviewThumb").style.display = "none";
+      document.getElementById("pSizes").value = "S, M, L, XL, XXL";
+      adminBase64Image = "";
+
+      App.showToast(`Published "${title}" to store catalog!`);
+      AdminManager.initAdminDashboard();
+      document.getElementById("catalogSection").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function confirmResetCatalog() {
+      if (confirm("Reset catalog to the 5 official attached shirt products? Custom uploads will be cleared.")) {
+        ProductsAPI.resetCatalog();
+        App.showToast("Catalog reset to official 5 shirts");
+        AdminManager.initAdminDashboard();
+      }
+    }
+
+    function confirmClearOrders() {
+      if (confirm("Clear all recorded customer orders?")) {
+        localStorage.removeItem("uv_orders_history");
+        App.showToast("All orders cleared");
+        AdminManager.initAdminDashboard();
+      }
+    }
+  </script>
+</body>
+</html>

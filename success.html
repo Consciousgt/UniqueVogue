@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed — Unified Vogue</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="images/logo.jpg" alt="Unified Vogue Logo" onerror="this.style.display='none'" />
+        <div class="nav-brand-text">
+          <span class="nav-brand-name serif">Unified Vogue</span>
+          <span class="nav-brand-tag">Your Outfits Speaks Fashion</span>
+        </div>
+      </a>
+    </div>
+  </nav>
+
+  <div class="success-page">
+    <div class="success-card">
+      <div class="success-icon">
+        <i class="fa-solid fa-check"></i>
+      </div>
+
+      <h1 class="serif">Order Received!</h1>
+      <p>Thank you for shopping with <strong>Unified Vogue</strong>.</p>
+      <p>Your payment reference code is:</p>
+      <div class="ref-code" id="refDisplay">UV-XXXXXX-PAY</div>
+
+      <div class="steps-box">
+        <h4>What to do next:</h4>
+        <div class="step">
+          <span class="step-num">1</span>
+          <span class="step-text">Make your bank transfer payment into Opay Account: <strong>7044027511</strong> (Chioma Peace Okafor).</span>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <span class="step-text">Click the WhatsApp button below to send your payment receipt & order details to Angela.</span>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <span class="step-text">We will verify payment and dispatch your order within 24 hours nationwide!</span>
+        </div>
+      </div>
+
+      <a href="#" id="waBtn" class="wa-cta" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+        Send Payment Receipt on WhatsApp
+      </a>
+
+      <a href="index.html" class="btn btn-outline btn-full" style="margin-top: 10px;">
+        <i class="fa-solid fa-house"></i> Return to Main Store
+      </a>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const ref = urlParams.get('ref') || 'UV-894021-PAY';
+      const waUrl = urlParams.get('wa') || `https://wa.me/2347044027511`;
+
+      document.getElementById('refDisplay').textContent = ref;
+      document.getElementById('waBtn').setAttribute('href', decodeURIComponent(waUrl));
+    });
+  </script>
+</body>
+</html>
