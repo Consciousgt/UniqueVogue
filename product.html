@@ -5,13 +5,98 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Product Details — Unified Vogue</title>
   <meta name="description" content="Product detail view — Unified Vogue luxury fashion catalog."/>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
   <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    /* ── Size Chart Modal ─────────────────────────────────────────── */
+    .sc-overlay {
+      display: none; position: fixed; inset: 0; z-index: 4000;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .sc-overlay.open { display: flex; }
+    .sc-modal {
+      background: var(--black-card); border: 1px solid var(--border-gold);
+      border-radius: var(--r-lg); max-width: 640px; width: 100%;
+      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow);
+      animation: scSlide 0.28s cubic-bezier(0.25,1,0.5,1) both;
+    }
+    @keyframes scSlide { from{transform:translateY(30px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+    .sc-header {
+      padding: 20px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sc-header h3 { font-size: 1.1rem; font-weight: 600; font-family: var(--font-d); color: var(--gold-light); }
+    .sc-header p { font-size: 0.78rem; color: var(--grey); margin-top: 2px; }
+    .sc-close {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--grey); width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1rem; transition: var(--ease); flex-shrink: 0;
+    }
+    .sc-close:hover { border-color: var(--gold); color: var(--gold); }
+    .sc-body { padding: 20px 22px; }
+
+    /* How to Measure tip */
+    .sc-tip {
+      background: rgba(197,160,89,0.07); border-left: 3px solid var(--gold);
+      border-radius: 0 var(--r-sm) var(--r-sm) 0;
+      padding: 12px 14px; margin-bottom: 18px;
+      font-size: 0.82rem; color: var(--grey); line-height: 1.6;
+    }
+    .sc-tip strong { color: var(--gold-light); }
+
+    /* Measurement diagram labels */
+    .sc-diagram {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+    .sc-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.76rem; color: var(--grey);
+    }
+    .sc-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--gold); flex-shrink: 0;
+    }
+
+    /* Size chart table */
+    .sc-table-wrap { overflow-x: auto; }
+    .sc-table {
+      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+    }
+    .sc-table thead th {
+      background: var(--black); color: var(--gold);
+      padding: 10px 14px; font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 1.5px; font-weight: 700; text-align: center;
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .sc-table thead th:first-child { text-align: left; }
+    .sc-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; }
+    .sc-table tbody tr:last-child { border-bottom: none; }
+    .sc-table tbody tr:hover { background: rgba(197,160,89,0.04); }
+    .sc-table td {
+      padding: 11px 14px; text-align: center; color: var(--grey);
+    }
+    .sc-table td:first-child {
+      text-align: left; font-weight: 800; color: var(--gold-light);
+      letter-spacing: 1px; font-size: 0.88rem;
+    }
+    .sc-table td.selected-row { background: rgba(197,160,89,0.09); }
+    .sc-table td:first-child.selected-row { color: var(--gold); }
+    .sc-unit { font-size: 0.72rem; color: var(--grey-dim); text-align: right; margin-top: 12px; }
+
+    /* No chart placeholder */
+    .no-chart {
+      text-align: center; padding: 30px 16px;
+      color: var(--grey-dim); font-size: 0.88rem;
+    }
+    .no-chart i { font-size: 2rem; display: block; margin-bottom: 10px; color: var(--border-gold); }
+  </style>
 </head>
 <body>
 
@@ -28,14 +113,12 @@
           <span class="nav-brand-tag">Your Outfits Speaks Fashion</span>
         </div>
       </a>
-
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
         <li><a href="shop.html" class="active">Shop</a></li>
         <li><a href="index.html#contactSection">Contact</a></li>
         <span class="nav-close" id="navClose"><i class="fa-solid fa-xmark"></i></span>
       </ul>
-
       <div class="nav-actions">
         <a href="cart.html" class="nav-icon" title="Shopping Bag">
           <i class="fa-solid fa-bag-shopping"></i>
@@ -46,7 +129,25 @@
     </div>
   </nav>
 
-  <!-- Product Detail Content -->
+  <!-- Size Chart Modal -->
+  <div class="sc-overlay" id="sizeChartOverlay" onclick="closeSizeChart(event)">
+    <div class="sc-modal" id="sizeChartModal">
+      <div class="sc-header">
+        <div>
+          <h3><i class="fa-solid fa-ruler" style="color:var(--gold);margin-right:6px;font-size:0.9rem;"></i> Size Chart</h3>
+          <p id="scProductName">All measurements are in centimetres (cm)</p>
+        </div>
+        <button class="sc-close" onclick="document.getElementById('sizeChartOverlay').classList.remove('open')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="sc-body" id="sizeChartBody">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Page -->
   <div class="container">
     <nav class="breadcrumb">
       <a href="index.html">Home</a>
@@ -61,13 +162,10 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <footer class="footer">
-    <div class="container">
-      <div class="footer-bottom">
-        <span>&copy; 2025 Unified Vogue. All Rights Reserved.</span>
-        <a href="shop.html" style="color:var(--gold);">← Back to Catalog</a>
-      </div>
+    <div class="container footer-bottom">
+      <span>&copy; 2025 Unified Vogue. All Rights Reserved.</span>
+      <a href="shop.html" style="color:var(--gold);">← Back to Catalog</a>
     </div>
   </footer>
 
@@ -77,12 +175,14 @@
 
   <script>
     let selectedSize = 'S';
-    let selectedQty = 1;
+    let selectedQty  = 1;
+    let currentProduct = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const prodId = urlParams.get('id') || 'uv-1';
-      const p = ProductsAPI.getProductById(prodId);
+      const prodId    = urlParams.get('id') || 'uv-1';
+      const p         = ProductsAPI.getProductById(prodId);
+      currentProduct  = p;
       const container = document.getElementById('detailContainer');
 
       if (!p) {
@@ -100,10 +200,12 @@
       document.title = `${p.name} — Unified Vogue`;
       selectedSize = p.sizes ? p.sizes[0] : 'S';
 
+      const hasSizeChart = p.sizeChart && p.sizeChart.measurements && p.sizeChart.measurements.length > 0;
+
       container.innerHTML = `
         <div class="detail-gallery">
           <div class="gallery-main">
-            <img src="${p.image}" alt="${p.name}" />
+            <img src="${p.image}" alt="${p.name}" onerror="this.src='images/logo.jpg'" />
           </div>
         </div>
 
@@ -124,7 +226,16 @@
 
           <p class="detail-desc">${p.description}</p>
 
-          <div class="size-label">Select Size</div>
+          <!-- Size Selector -->
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <span class="size-label" style="margin-bottom:0;">Select Size</span>
+            ${hasSizeChart ? `
+              <button onclick="openSizeChart()" style="background:none; border:none; color:var(--gold); font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; font-family:var(--font-s); transition:var(--ease);">
+                <i class="fa-solid fa-ruler"></i> Size Chart & Measurements
+              </button>
+            ` : ''}
+          </div>
+
           <div class="size-btns" id="sizeBtns">
             ${(p.sizes || ['S','M','L','XL','XXL']).map((s, i) => `
               <button class="size-btn ${i === 0 ? 'on' : ''}" onclick="setSize(this, '${s}')">${s}</button>
@@ -159,37 +270,148 @@
               <span>Guaranteed authentic Unified Vogue design</span>
             </div>
             <div class="info-row">
+              <i class="fa-solid fa-building-columns"></i>
+              <span>Pay via Opay: <strong style="color:var(--gold-light);">6584992459</strong> — CHIOMA PEACE OKAFOR</span>
+            </div>
+            <div class="info-row">
               <i class="fa-brands fa-whatsapp"></i>
-              <span>Instant order verification via WhatsApp</span>
+              <span>Order confirmation on WhatsApp after checkout</span>
             </div>
           </div>
         </div>
       `;
 
+      // Mobile nav
       const toggle = document.getElementById('navToggle');
-      const links = document.getElementById('navLinks');
-      const close = document.getElementById('navClose');
+      const links  = document.getElementById('navLinks');
+      const close  = document.getElementById('navClose');
       if (toggle && links) {
         toggle.addEventListener('click', () => links.classList.add('open'));
         if (close) close.addEventListener('click', () => links.classList.remove('open'));
       }
     });
 
+    /* ── Size Picker ── */
     function setSize(btn, size) {
       selectedSize = size;
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
+      // Highlight that row in size chart if open
+      highlightChartRow(size);
     }
 
+    /* ── Qty ── */
     function changeQty(delta) {
       selectedQty = Math.max(1, selectedQty + delta);
       document.getElementById('qtyNum').textContent = selectedQty;
     }
 
+    /* ── Add to Bag ── */
     function addToBag() {
       const urlParams = new URLSearchParams(window.location.search);
       const prodId = urlParams.get('id') || 'uv-1';
       CartManager.addToCart(prodId, selectedQty, selectedSize);
+    }
+
+    /* ── Size Chart Modal ── */
+    function openSizeChart() {
+      const p = currentProduct;
+      if (!p) return;
+      document.getElementById('scProductName').textContent = p.name;
+      renderSizeChart(p);
+      document.getElementById('sizeChartOverlay').classList.add('open');
+    }
+
+    function closeSizeChart(e) {
+      if (e.target === document.getElementById('sizeChartOverlay')) {
+        document.getElementById('sizeChartOverlay').classList.remove('open');
+      }
+    }
+
+    function renderSizeChart(p) {
+      const body = document.getElementById('sizeChartBody');
+      const sc   = p.sizeChart;
+
+      if (!sc || !sc.measurements || sc.measurements.length === 0) {
+        body.innerHTML = `
+          <div class="no-chart">
+            <i class="fa-solid fa-ruler-combined"></i>
+            No size chart has been added for this product yet.<br>
+            Please contact us on WhatsApp for measurements.
+          </div>`;
+        return;
+      }
+
+      const unit = sc.unit || 'cm';
+
+      // Determine which columns exist across all rows
+      const sampleRow = sc.measurements[0];
+      const cols = ['shoulder','chest','waist','hip','length'].filter(k => sampleRow[k] !== undefined && sampleRow[k] !== '');
+
+      const colLabels = {
+        shoulder: '👕 Shoulder',
+        chest:    '📐 Chest',
+        waist:    '〰️ Waist',
+        hip:      '📏 Hip',
+        length:   '↕️ Length'
+      };
+
+      body.innerHTML = `
+        <div class="sc-tip">
+          <strong>How to measure:</strong><br>
+          • <strong>Shoulder</strong> — across the back from shoulder seam to seam<br>
+          • <strong>Chest</strong> — fullest part of chest, arms relaxed<br>
+          • <strong>Waist</strong> — narrowest part of natural waistline<br>
+          • <strong>Hip</strong> — fullest part of hips<br>
+          • <strong>Length</strong> — from top of shoulder seam to hem
+        </div>
+
+        <div class="sc-table-wrap">
+          <table class="sc-table">
+            <thead>
+              <tr>
+                <th>Size</th>
+                ${cols.map(c => `<th>${colLabels[c]}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${sc.measurements.map(row => {
+                const isSelected = row.size === selectedSize;
+                return `
+                  <tr ${isSelected ? 'id="sc-row-' + row.size + '"' : 'id="sc-row-' + row.size + '"'}>
+                    <td class="${isSelected ? 'selected-row' : ''}" style="font-weight:800; color:${isSelected ? 'var(--gold)' : 'var(--gold-light)'};">
+                      ${row.size} ${isSelected ? '<i class="fa-solid fa-check" style="color:var(--gold); font-size:0.7rem; margin-left:4px;"></i>' : ''}
+                    </td>
+                    ${cols.map(c => `<td class="${isSelected ? 'selected-row' : ''}">${row[c] || '—'}</td>`).join('')}
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <p class="sc-unit">All measurements in ${unit}. Sizes may vary slightly due to fabric and construction.</p>
+
+        <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+          <a href="https://wa.me/2347044027511?text=Hello%20Angela%2C%20I%20need%20help%20with%20sizing%20for%20${encodeURIComponent(p.name)}" target="_blank"
+            style="display:inline-flex; align-items:center; gap:7px; background:#25D366; color:#fff; padding:9px 18px; border-radius:var(--r-full); font-size:0.82rem; font-weight:700; text-decoration:none; transition:var(--ease);">
+            <i class="fa-brands fa-whatsapp"></i> Ask Angela for Help with Sizing
+          </a>
+        </div>
+      `;
+    }
+
+    function highlightChartRow(size) {
+      document.querySelectorAll('.sc-table tbody tr').forEach(tr => {
+        const firstTd = tr.querySelector('td:first-child');
+        const isThis  = tr.id === `sc-row-${size}`;
+        tr.querySelectorAll('td').forEach(td => {
+          td.classList.toggle('selected-row', isThis);
+        });
+        if (firstTd) {
+          firstTd.style.color = isThis ? 'var(--gold)' : 'var(--gold-light)';
+        }
+      });
     }
   </script>
 </body>

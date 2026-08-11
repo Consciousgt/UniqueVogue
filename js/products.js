@@ -1,5 +1,5 @@
 /* ==========================================================================
-   UNIFIED VOGUE — OFFICIAL PRODUCT CATALOG (ALWAYS USES REAL ATTACHED IMAGES)
+   UNIFIED VOGUE — OFFICIAL PRODUCT CATALOG WITH SIZE CHART SUPPORT
    ========================================================================== */
 
 const OFFICIAL_CATALOG = [
@@ -13,7 +13,17 @@ const OFFICIAL_CATALOG = [
     rating: 5.0,
     stock: 25,
     sizes: ["S", "M", "L", "XL", "XXL"],
-    description: "A luxury all-black open-knit shirt featuring a relaxed Cuban camp collar, tonal button closure, and premium textured finish. Lightweight, breathable, and designed for effortless sophistication."
+    description: "A luxury all-black open-knit shirt featuring a relaxed Cuban camp collar, tonal button closure, and premium textured finish. Lightweight, breathable, and designed for effortless sophistication.",
+    sizeChart: {
+      unit: "cm",
+      measurements: [
+        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
+        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
+        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
+        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
+        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
+      ]
+    }
   },
   {
     id: "uv-2",
@@ -25,7 +35,17 @@ const OFFICIAL_CATALOG = [
     rating: 4.9,
     stock: 20,
     sizes: ["S", "M", "L", "XL", "XXL"],
-    description: "A bold, artistic vintage-style short-sleeve shirt with an eye-catching black, white, and gold brushstroke pattern. Crafted from smooth, lightweight fabric for maximum comfort and style."
+    description: "A bold, artistic vintage-style short-sleeve shirt with an eye-catching black, white, and gold brushstroke pattern. Crafted from smooth, lightweight fabric for maximum comfort and style.",
+    sizeChart: {
+      unit: "cm",
+      measurements: [
+        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
+        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
+        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
+        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
+        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
+      ]
+    }
   },
   {
     id: "uv-3",
@@ -37,7 +57,17 @@ const OFFICIAL_CATALOG = [
     rating: 5.0,
     stock: 18,
     sizes: ["S", "M", "L", "XL", "XXL"],
-    description: "Rich chocolate-brown open-knit shirt with classic Cuban lapels and custom pearlized buttons. Warm, elegant, and versatile — a staple piece for high-fashion casual styling."
+    description: "Rich chocolate-brown open-knit shirt with classic Cuban lapels and custom pearlized buttons. Warm, elegant, and versatile — a staple piece for high-fashion casual styling.",
+    sizeChart: {
+      unit: "cm",
+      measurements: [
+        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
+        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
+        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
+        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
+        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
+      ]
+    }
   },
   {
     id: "uv-4",
@@ -49,7 +79,17 @@ const OFFICIAL_CATALOG = [
     rating: 4.9,
     stock: 15,
     sizes: ["S", "M", "L", "XL", "XXL"],
-    description: "Vibrant ocean teal and deep black African-inspired swirl pattern shirt. Features a tailored resort fit that makes a powerful fashion statement wherever you go."
+    description: "Vibrant ocean teal and deep black African-inspired swirl pattern shirt. Features a tailored resort fit that makes a powerful fashion statement wherever you go.",
+    sizeChart: {
+      unit: "cm",
+      measurements: [
+        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
+        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
+        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
+        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
+        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
+      ]
+    }
   },
   {
     id: "uv-5",
@@ -61,11 +101,21 @@ const OFFICIAL_CATALOG = [
     rating: 5.0,
     stock: 22,
     sizes: ["S", "M", "L", "XL", "XXL"],
-    description: "Refined beige open-knit shirt with horizontal micro-stripe texture and short sleeves. Understated luxury that pairs flawlessly with dark trousers or casual wear."
+    description: "Refined beige open-knit shirt with horizontal micro-stripe texture and short sleeves. Understated luxury that pairs flawlessly with dark trousers or casual wear.",
+    sizeChart: {
+      unit: "cm",
+      measurements: [
+        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
+        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
+        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
+        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
+        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
+      ]
+    }
   }
 ];
 
-const DB_KEY = "uv_vogue_catalog_v4";
+const DB_KEY = "uv_vogue_catalog_v5";
 
 class ProductsAPI {
   static getProducts() {
@@ -95,6 +145,7 @@ class ProductsAPI {
       rating: 5.0,
       stock: productData.stock || 10,
       sizes: productData.sizes || ["S", "M", "L", "XL", "XXL"],
+      sizeChart: productData.sizeChart || null,
       ...productData
     };
     products.unshift(newProd);

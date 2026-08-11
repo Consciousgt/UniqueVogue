@@ -35,7 +35,7 @@ class CheckoutManager {
       `*Delivery Fee:* ${shipping === 0 ? 'FREE' : App.formatMoney(shipping)}\n` +
       `*TOTAL PAID:* ${App.formatMoney(grandTotal)}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `I have transferred the payment into Opay (Acc: 7044027511 - Chioma Peace Okafor). Please confirm receipt and dispatch order. Thank you!`;
+      `I have transferred the payment into Opay (Acc: 6584992459 - CHIOMA PEACE OKAFOR). Please confirm receipt and dispatch order. Thank you!`;
 
     // Save order record for Admin portal
     const orderRecord = {

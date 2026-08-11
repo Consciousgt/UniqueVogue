@@ -33,7 +33,9 @@ class AdminManager {
       return;
     }
 
-    tbody.innerHTML = products.map(p => `
+    tbody.innerHTML = products.map(p => {
+      const hasChart = p.sizeChart && p.sizeChart.measurements && p.sizeChart.measurements.length > 0;
+      return `
       <tr>
         <td><img src="${p.image}" alt="${p.name}" onerror="this.src='images/logo.jpg'" /></td>
         <td>
@@ -47,6 +49,12 @@ class AdminManager {
           <span style="font-size:0.75rem; color:var(--grey-dim);">in stock</span>
         </td>
         <td>
+          <button onclick="openEditSizeChart('${p.id}')"
+            style="display:inline-flex; align-items:center; gap:5px; background:${hasChart ? 'rgba(197,160,89,0.12)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${hasChart ? 'var(--border-gold)' : 'var(--border)'}; color:${hasChart ? 'var(--gold)' : 'var(--grey-dim)'}; padding:5px 12px; border-radius:var(--r-full); font-size:0.74rem; font-weight:700; cursor:pointer; font-family:var(--font-s); transition:var(--ease);">
+            <i class="fa-solid fa-ruler"></i> ${hasChart ? 'Edit Chart' : 'Add Chart'}
+          </button>
+        </td>
+        <td>
           <div style="display:flex; gap:6px;">
             <button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:0.72rem;" onclick="AdminManager.quickEditStock('${p.id}')">
               <i class="fa-solid fa-pen"></i> Edit
@@ -57,7 +65,7 @@ class AdminManager {
           </div>
         </td>
       </tr>
-    `).join('');
+    `}).join('');
   }
 
   static renderOrdersTable() {
