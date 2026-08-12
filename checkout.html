@@ -56,13 +56,13 @@
 
             <div class="form-group">
               <label>Full Name *</label>
-              <input type="text" id="custName" class="form-ctrl" placeholder="e.g. Angela Johnson" required />
+              <input type="text" id="custName" class="form-ctrl" placeholder="e.g. Amara Obi" required />
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Phone / WhatsApp Number *</label>
-                <input type="tel" id="custPhone" class="form-ctrl" placeholder="e.g. 07044027511" required />
+                <input type="tel" id="custPhone" class="form-ctrl" placeholder="e.g. 08012345678" required />
               </div>
               <div class="form-group">
                 <label>State / Delivery City *</label>
@@ -134,15 +134,19 @@
               <span id="coSubtotal">₦0</span>
             </div>
             <div class="co-row">
-              <span>Express Delivery</span>
-              <span id="coDelivery">₦3,500</span>
+              <span>Delivery Fee</span>
+              <span id="coDelivery" style="color:var(--gold); font-size:0.82rem;">Confirmed by seller</span>
             </div>
 
             <div class="co-div"></div>
 
             <div class="co-row co-total">
-              <span>Total Amount</span>
+              <span>Items Total</span>
               <span id="coTotal">₦0</span>
+            </div>
+            <div style="font-size:0.76rem; color:var(--grey-dim); margin-top:6px; line-height:1.5;">
+              <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i>
+              Delivery fee will be confirmed by the seller on WhatsApp before dispatch.
             </div>
           </div>
         </div>
@@ -164,8 +168,6 @@
   <script src="js/checkout.js"></script>
 
   <script>
-    const DELIVERY_FEE = 3500;
-
     document.addEventListener('DOMContentLoaded', () => {
       const cart = CartManager.getCart();
       if (cart.length === 0) {
@@ -191,10 +193,8 @@
         `;
       }).join('');
 
-      const delivery = subtotal >= 30000 ? 0 : DELIVERY_FEE;
       document.getElementById('coSubtotal').textContent = App.formatMoney(subtotal);
-      document.getElementById('coDelivery').textContent = delivery === 0 ? 'FREE' : App.formatMoney(delivery);
-      document.getElementById('coTotal').textContent = App.formatMoney(subtotal + delivery);
+      document.getElementById('coTotal').textContent = App.formatMoney(subtotal);
     });
 
     function handleCheckoutSubmit(e) {

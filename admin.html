@@ -97,15 +97,15 @@
   <div class="edit-sc-overlay" id="editScOverlay" onclick="closeEditSc(event)">
     <div class="edit-sc-modal">
       <h3><i class="fa-solid fa-ruler" style="color:var(--gold);margin-right:6px;"></i> Edit Size Chart</h3>
-      <p id="editScProductName">Fill in measurements for each size (in cm). Leave blank to hide that measurement column.</p>
+      <p id="editScProductName">Fill in measurements for each size (in inches, e.g. 27", 17", 8", 40"). Leave blank to hide that column.</p>
 
       <div class="sc-col-headers">
         <span>Size</span>
+        <span>Length</span>
         <span>Shoulder</span>
-        <span>Chest</span>
-        <span>Waist</span>
-        <span class="sc-hip">Hip</span>
-        <span class="sc-len">Length</span>
+        <span>Sleeve</span>
+        <span class="sc-hip">Chest</span>
+        <span class="sc-len">Waist</span>
       </div>
       <div class="sc-builder" id="editScBuilder">
         <!-- Rows injected per product sizes -->
@@ -244,15 +244,15 @@
           <div class="form-group">
             <label style="display:flex; align-items:center; justify-content:space-between;">
               <span>Size Chart Measurements <span style="color:var(--grey-dim); font-weight:400;">(optional)</span></span>
-              <span style="font-size:0.72rem; color:var(--grey-dim);">in cm</span>
+              <span style="font-size:0.72rem; color:var(--grey-dim);">in inches (")</span>
             </label>
             <div class="sc-col-headers">
               <span>Size</span>
+              <span>Length</span>
               <span>Shoulder</span>
-              <span>Chest</span>
-              <span>Waist</span>
-              <span class="sc-hip">Hip</span>
-              <span class="sc-len">Length</span>
+              <span>Sleeve</span>
+              <span class="sc-hip">Chest</span>
+              <span class="sc-len">Waist</span>
             </div>
             <div class="sc-builder" id="newProductScBuilder">
               <!-- Rendered by JS when sizes field changes -->
@@ -373,28 +373,27 @@
       return `
         <div class="sc-builder-row">
           <label>${sz}</label>
-          <input type="number" placeholder="e.g. 44" value="${data.shoulder||''}" id="${prefix}-sc-shoulder-${sz}" min="0" />
-          <input type="number" placeholder="e.g. 100" value="${data.chest||''}" id="${prefix}-sc-chest-${sz}" min="0" />
-          <input type="number" placeholder="e.g. 94" value="${data.waist||''}" id="${prefix}-sc-waist-${sz}" min="0" />
-          <input type="number" placeholder="e.g. 100" value="${data.hip||''}" id="${prefix}-sc-hip-${sz}" min="0" class="sc-hip" />
-          <input type="number" placeholder="e.g. 74" value="${data.length||''}" id="${prefix}-sc-length-${sz}" min="0" class="sc-len" />
+          <input type="text" placeholder='27"' value="${data.length||''}" id="${prefix}-sc-length-${sz}" />
+          <input type="text" placeholder='17"' value="${data.shoulder||''}" id="${prefix}-sc-shoulder-${sz}" />
+          <input type="text" placeholder='8"' value="${data.sleeve||''}" id="${prefix}-sc-sleeve-${sz}" />
+          <input type="text" placeholder='40"' value="${data.chest||''}" id="${prefix}-sc-chest-${sz}" class="sc-hip" />
+          <input type="text" placeholder='—' value="${data.waist||''}" id="${prefix}-sc-waist-${sz}" class="sc-len" />
         </div>`;
     }
 
     function readScBuilderData(sizes, prefix) {
       const measurements = [];
       sizes.forEach(sz => {
-        const shoulder = document.getElementById(`${prefix}-sc-shoulder-${sz}`)?.value || '';
-        const chest    = document.getElementById(`${prefix}-sc-chest-${sz}`)?.value || '';
-        const waist    = document.getElementById(`${prefix}-sc-waist-${sz}`)?.value || '';
-        const hip      = document.getElementById(`${prefix}-sc-hip-${sz}`)?.value || '';
-        const length   = document.getElementById(`${prefix}-sc-length-${sz}`)?.value || '';
-        // Only include row if at least one measurement is filled
-        if (shoulder || chest || waist || hip || length) {
-          measurements.push({ size: sz, shoulder, chest, waist, hip, length });
+        const length   = document.getElementById(`${prefix}-sc-length-${sz}`)?.value.trim() || '';
+        const shoulder = document.getElementById(`${prefix}-sc-shoulder-${sz}`)?.value.trim() || '';
+        const sleeve   = document.getElementById(`${prefix}-sc-sleeve-${sz}`)?.value.trim() || '';
+        const chest    = document.getElementById(`${prefix}-sc-chest-${sz}`)?.value.trim() || '';
+        const waist    = document.getElementById(`${prefix}-sc-waist-${sz}`)?.value.trim() || '';
+        if (length || shoulder || sleeve || chest || waist) {
+          measurements.push({ size: sz, length, shoulder, sleeve, chest, waist });
         }
       });
-      return measurements.length > 0 ? { unit: 'cm', measurements } : null;
+      return measurements.length > 0 ? { unit: 'inches', measurements } : null;
     }
 
     /* ── Upload New Product ── */

@@ -1,6 +1,17 @@
 /* ==========================================================================
-   UNIFIED VOGUE — OFFICIAL PRODUCT CATALOG WITH SIZE CHART SUPPORT
+   UNIFIED VOGUE — OFFICIAL PRODUCT CATALOG WITH INCH SIZE CHART
    ========================================================================== */
+
+const OFFICIAL_SIZE_CHART = {
+  unit: "inches",
+  measurements: [
+    { size: "S",   length: '27"', shoulder: '17"', sleeve: '8"',   chest: '40"' },
+    { size: "M",   length: '28"', shoulder: '18"', sleeve: '8.5"', chest: '42"' },
+    { size: "L",   length: '29"', shoulder: '19"', sleeve: '9"',   chest: '44"' },
+    { size: "XL",  length: '30"', shoulder: '20"', sleeve: '9.5"', chest: '46"' },
+    { size: "2XL", length: '31"', shoulder: '21"', sleeve: '10"',  chest: '48"' }
+  ]
+};
 
 const OFFICIAL_CATALOG = [
   {
@@ -12,18 +23,9 @@ const OFFICIAL_CATALOG = [
     badge: "Bestseller",
     rating: 5.0,
     stock: 25,
-    sizes: ["S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "2XL"],
     description: "A luxury all-black open-knit shirt featuring a relaxed Cuban camp collar, tonal button closure, and premium textured finish. Lightweight, breathable, and designed for effortless sophistication.",
-    sizeChart: {
-      unit: "cm",
-      measurements: [
-        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
-        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
-        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
-        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
-        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
-      ]
-    }
+    sizeChart: OFFICIAL_SIZE_CHART
   },
   {
     id: "uv-2",
@@ -34,18 +36,9 @@ const OFFICIAL_CATALOG = [
     badge: "New Arrival",
     rating: 4.9,
     stock: 20,
-    sizes: ["S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "2XL"],
     description: "A bold, artistic vintage-style short-sleeve shirt with an eye-catching black, white, and gold brushstroke pattern. Crafted from smooth, lightweight fabric for maximum comfort and style.",
-    sizeChart: {
-      unit: "cm",
-      measurements: [
-        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
-        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
-        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
-        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
-        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
-      ]
-    }
+    sizeChart: OFFICIAL_SIZE_CHART
   },
   {
     id: "uv-3",
@@ -56,18 +49,9 @@ const OFFICIAL_CATALOG = [
     badge: "Hot Deal",
     rating: 5.0,
     stock: 18,
-    sizes: ["S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "2XL"],
     description: "Rich chocolate-brown open-knit shirt with classic Cuban lapels and custom pearlized buttons. Warm, elegant, and versatile — a staple piece for high-fashion casual styling.",
-    sizeChart: {
-      unit: "cm",
-      measurements: [
-        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
-        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
-        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
-        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
-        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
-      ]
-    }
+    sizeChart: OFFICIAL_SIZE_CHART
   },
   {
     id: "uv-4",
@@ -78,18 +62,9 @@ const OFFICIAL_CATALOG = [
     badge: "New Arrival",
     rating: 4.9,
     stock: 15,
-    sizes: ["S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "2XL"],
     description: "Vibrant ocean teal and deep black African-inspired swirl pattern shirt. Features a tailored resort fit that makes a powerful fashion statement wherever you go.",
-    sizeChart: {
-      unit: "cm",
-      measurements: [
-        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
-        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
-        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
-        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
-        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
-      ]
-    }
+    sizeChart: OFFICIAL_SIZE_CHART
   },
   {
     id: "uv-5",
@@ -100,22 +75,13 @@ const OFFICIAL_CATALOG = [
     badge: "Featured",
     rating: 5.0,
     stock: 22,
-    sizes: ["S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "2XL"],
     description: "Refined beige open-knit shirt with horizontal micro-stripe texture and short sleeves. Understated luxury that pairs flawlessly with dark trousers or casual wear.",
-    sizeChart: {
-      unit: "cm",
-      measurements: [
-        { size: "S",   shoulder: "42", chest: "96",  waist: "90",  hip: "96",  length: "72" },
-        { size: "M",   shoulder: "44", chest: "100", waist: "94",  hip: "100", length: "74" },
-        { size: "L",   shoulder: "46", chest: "108", waist: "102", hip: "108", length: "76" },
-        { size: "XL",  shoulder: "48", chest: "116", waist: "110", hip: "116", length: "78" },
-        { size: "XXL", shoulder: "50", chest: "124", waist: "118", hip: "124", length: "80" }
-      ]
-    }
+    sizeChart: OFFICIAL_SIZE_CHART
   }
 ];
 
-const DB_KEY = "uv_vogue_catalog_v5";
+const DB_KEY = "uv_vogue_catalog_v6";
 
 class ProductsAPI {
   static getProducts() {
@@ -144,8 +110,8 @@ class ProductsAPI {
       id: "uv-" + Date.now(),
       rating: 5.0,
       stock: productData.stock || 10,
-      sizes: productData.sizes || ["S", "M", "L", "XL", "XXL"],
-      sizeChart: productData.sizeChart || null,
+      sizes: productData.sizes || ["S", "M", "L", "XL", "2XL"],
+      sizeChart: productData.sizeChart || OFFICIAL_SIZE_CHART,
       ...productData
     };
     products.unshift(newProd);

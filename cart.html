@@ -16,7 +16,7 @@
 <body>
 
   <div class="topbar">
-    <i class="fa-solid fa-star"></i>&nbsp; Free Nationwide Delivery on Orders Over ₦30,000 &nbsp;<i class="fa-solid fa-star"></i>
+    <i class="fa-solid fa-star"></i>&nbsp; Nationwide Delivery Available &nbsp;·&nbsp; Premium Luxury Shirts &nbsp;<i class="fa-solid fa-star"></i>
   </div>
 
   <nav class="nav">
@@ -78,15 +78,19 @@
           <span id="subTotalVal">₦0</span>
         </div>
         <div class="summary-row">
-          <span>Nationwide Delivery</span>
-          <span id="deliveryVal">₦3,500</span>
+          <span>Delivery Fee</span>
+          <span id="deliveryVal" style="color:var(--gold); font-size:0.82rem;">Confirmed by seller</span>
         </div>
 
         <div class="summary-div"></div>
 
         <div class="summary-row summary-total">
-          <span>Grand Total</span>
+          <span>Items Total</span>
           <span id="grandTotalVal">₦0</span>
+        </div>
+        <div style="font-size:0.76rem; color:var(--grey-dim); margin-top:8px; line-height:1.5;">
+          <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i>
+          Delivery fee confirmed on WhatsApp before dispatch.
         </div>
 
         <a href="checkout.html" class="btn btn-gold btn-full" id="checkoutBtn" style="margin-top:20px;">
@@ -114,7 +118,7 @@
   <script src="js/cart.js"></script>
 
   <script>
-    const DELIVERY_FEE = 3500;
+    const DELIVERY_FEE = 0;
 
     function renderCart() {
       const cart = CartManager.getCart();
@@ -193,10 +197,9 @@
         </table>
       `;
 
-      const delivery = subtotal >= 30000 ? 0 : DELIVERY_FEE;
+      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
       document.getElementById('subTotalVal').textContent = App.formatMoney(subtotal);
-      document.getElementById('deliveryVal').textContent = delivery === 0 ? 'FREE' : App.formatMoney(delivery);
-      document.getElementById('grandTotalVal').textContent = App.formatMoney(subtotal + delivery);
+      document.getElementById('grandTotalVal').textContent = App.formatMoney(subtotal);
     }
 
     function updateQty(id, size, delta) {

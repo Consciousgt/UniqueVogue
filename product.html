@@ -101,7 +101,7 @@
 <body>
 
   <div class="topbar">
-    <i class="fa-solid fa-star"></i>&nbsp; Free Nationwide Delivery on Orders Over ₦30,000 &nbsp;<i class="fa-solid fa-star"></i>
+    <i class="fa-solid fa-star"></i>&nbsp; Nationwide Delivery Available &nbsp;·&nbsp; Premium Luxury Shirts &nbsp;<i class="fa-solid fa-star"></i>
   </div>
 
   <nav class="nav">
@@ -263,7 +263,7 @@
           <div class="detail-info-box">
             <div class="info-row">
               <i class="fa-solid fa-truck-fast"></i>
-              <span>Express nationwide shipping — delivered in 24 hours</span>
+              <span>Nationwide shipping available — delivery fee confirmed via chat</span>
             </div>
             <div class="info-row">
               <i class="fa-solid fa-shield-halved"></i>
@@ -344,26 +344,26 @@
 
       const unit = sc.unit || 'cm';
 
-      // Determine which columns exist across all rows
-      const sampleRow = sc.measurements[0];
-      const cols = ['shoulder','chest','waist','hip','length'].filter(k => sampleRow[k] !== undefined && sampleRow[k] !== '');
+      // Determine which columns exist across all rows (order: length, shoulder, sleeve, chest)
+      const colOrder = ['length','shoulder','sleeve','chest','waist','hip'];
+      const cols = colOrder.filter(k => sampleRow[k] !== undefined && sampleRow[k] !== '');
 
       const colLabels = {
+        length:   '↕️ Length',
         shoulder: '👕 Shoulder',
+        sleeve:   '👔 Sleeve',
         chest:    '📐 Chest',
         waist:    '〰️ Waist',
-        hip:      '📏 Hip',
-        length:   '↕️ Length'
+        hip:      '📏 Hip'
       };
 
       body.innerHTML = `
         <div class="sc-tip">
           <strong>How to measure:</strong><br>
-          • <strong>Shoulder</strong> — across the back from shoulder seam to seam<br>
-          • <strong>Chest</strong> — fullest part of chest, arms relaxed<br>
-          • <strong>Waist</strong> — narrowest part of natural waistline<br>
-          • <strong>Hip</strong> — fullest part of hips<br>
-          • <strong>Length</strong> — from top of shoulder seam to hem
+          • <strong>Length</strong> — from shoulder seam to bottom hem<br>
+          • <strong>Shoulder</strong> — across back from shoulder seam to seam<br>
+          • <strong>Sleeve</strong> — shoulder seam down to sleeve cuff<br>
+          • <strong>Chest</strong> — fullest part of chest, arms relaxed
         </div>
 
         <div class="sc-table-wrap">

@@ -16,26 +16,31 @@ class CheckoutManager {
 
     const refCode = this.generateRefCode();
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const shipping = subtotal >= 30000 ? 0 : 3500;
-    const grandTotal = subtotal + shipping;
+    const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
 
-    const itemsText = cart.map(i => `• ${i.name} (Size: ${i.size}) x${i.qty} — ${App.formatMoney(i.price * i.qty)}`).join('\n');
+    // Format all items cleanly in order list
+    const itemsListText = cart.map((item, idx) => {
+      const itemTotal = item.price * item.qty;
+      return `${idx + 1}. *${item.name}*\n   • Size: ${item.size}\n   • Qty: ${item.qty}\n   • Price: ${App.formatMoney(itemTotal)}`;
+    }).join('\n\n');
 
-    const whatsappMessage = `*HAUTE COUTURE ORDER — UNIFIED VOGUE*\n` +
+    const whatsappMessage = 
+      `*HAUTE COUTURE ORDER — UNIFIED VOGUE*\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `*Reference:* ${refCode}\n` +
-      `*Customer:* ${formData.name}\n` +
-      `*Phone:* ${formData.phone}\n` +
-      `*City/State:* ${formData.city}\n` +
-      `*Address:* ${formData.address}\n` +
+      `*Order Reference:* ${refCode}\n` +
+      `*Customer Name:* ${formData.name}\n` +
+      `*Phone/WhatsApp:* ${formData.phone}\n` +
+      `*State/City:* ${formData.city}\n` +
+      `*Delivery Address:* ${formData.address}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `*ITEMS ORDERED:*\n${itemsText}\n` +
+      `*ITEMS ORDERED (${totalQty} item${totalQty > 1 ? 's' : ''}):*\n\n` +
+      `${itemsListText}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `*Subtotal:* ${App.formatMoney(subtotal)}\n` +
-      `*Delivery Fee:* ${shipping === 0 ? 'FREE' : App.formatMoney(shipping)}\n` +
-      `*TOTAL PAID:* ${App.formatMoney(grandTotal)}\n` +
+      `*Items Subtotal:* ${App.formatMoney(subtotal)}\n` +
+      `*Delivery Fee:* To be confirmed via WhatsApp chat\n` +
+      `*ITEMS TOTAL PAID:* ${App.formatMoney(subtotal)}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `I have transferred the payment into Opay (Acc: 6584992459 - CHIOMA PEACE OKAFOR). Please confirm receipt and dispatch order. Thank you!`;
+      `I have transferred ${App.formatMoney(subtotal)} into Opay (Acc: 6584992459 - CHIOMA PEACE OKAFOR). Please confirm receipt and let me know the delivery fee & dispatch timeline. Thank you!`;
 
     // Save order record for Admin portal
     const orderRecord = {
@@ -44,16 +49,16 @@ class CheckoutManager {
       customer: formData,
       items: cart,
       subtotal: subtotal,
-      shipping: shipping,
-      total: grandTotal,
-      status: 'Payment Confirmed'
+      shipping: 'TBD',
+      total: subtotal,
+      status: 'Payment Pending Confirmation'
     };
 
     const existingOrders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
     existingOrders.unshift(orderRecord);
     localStorage.setItem("uv_orders_history", JSON.stringify(existingOrders));
 
-    // Clear shopping bag after order
+    // Clear shopping bag after order submission
     CartManager.saveCart([]);
 
     // Direct WhatsApp receipt link to Angela's phone number (+2347044027511)
