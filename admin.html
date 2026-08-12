@@ -99,16 +99,18 @@
       <h3><i class="fa-solid fa-ruler" style="color:var(--gold);margin-right:6px;"></i> Edit Size Chart</h3>
       <p id="editScProductName">Fill in measurements for each size (in inches, e.g. 27", 17", 8", 40"). Leave blank to hide that column.</p>
 
-      <div class="sc-col-headers">
-        <span>Size</span>
-        <span>Length</span>
-        <span>Shoulder</span>
-        <span>Sleeve</span>
-        <span class="sc-hip">Chest</span>
-        <span class="sc-len">Waist</span>
-      </div>
-      <div class="sc-builder" id="editScBuilder">
-        <!-- Rows injected per product sizes -->
+      <div class="sc-builder-wrap">
+        <div class="sc-col-headers">
+          <span>Size</span>
+          <span>Length</span>
+          <span>Shoulder</span>
+          <span>Sleeve</span>
+          <span class="sc-hip">Chest</span>
+          <span class="sc-len">Waist</span>
+        </div>
+        <div class="sc-builder" id="editScBuilder">
+          <!-- Rows injected per product sizes -->
+        </div>
       </div>
 
       <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
@@ -138,10 +140,14 @@
           <span class="nav-brand-tag">Owner Command Portal</span>
         </div>
       </a>
-      <ul class="nav-links">
+      <ul class="nav-links" id="navLinks">
         <li><a href="index.html"><i class="fa-solid fa-globe"></i> Live Website</a></li>
         <li><a href="shop.html"><i class="fa-solid fa-store"></i> View Catalog</a></li>
+        <span class="nav-close" id="navClose"><i class="fa-solid fa-xmark"></i></span>
       </ul>
+      <div class="nav-actions">
+        <button class="nav-toggle" id="navToggle" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>
+      </div>
     </div>
   </nav>
 
@@ -246,16 +252,18 @@
               <span>Size Chart Measurements <span style="color:var(--grey-dim); font-weight:400;">(optional)</span></span>
               <span style="font-size:0.72rem; color:var(--grey-dim);">in inches (")</span>
             </label>
-            <div class="sc-col-headers">
-              <span>Size</span>
-              <span>Length</span>
-              <span>Shoulder</span>
-              <span>Sleeve</span>
-              <span class="sc-hip">Chest</span>
-              <span class="sc-len">Waist</span>
-            </div>
-            <div class="sc-builder" id="newProductScBuilder">
-              <!-- Rendered by JS when sizes field changes -->
+            <div class="sc-builder-wrap">
+              <div class="sc-col-headers">
+                <span>Size</span>
+                <span>Length</span>
+                <span>Shoulder</span>
+                <span>Sleeve</span>
+                <span class="sc-hip">Chest</span>
+                <span class="sc-len">Waist</span>
+              </div>
+              <div class="sc-builder" id="newProductScBuilder">
+                <!-- Rendered by JS when sizes field changes -->
+              </div>
             </div>
             <p style="font-size:0.74rem; color:var(--grey-dim); margin-top:6px;">Leave blank to skip size chart. You can add it later from the catalog table.</p>
           </div>
@@ -344,6 +352,15 @@
       document.getElementById("pinInput").addEventListener("keyup", e => {
         if (e.key === "Enter") checkOwnerPin();
       });
+
+      // Mobile Nav Drawer Toggle
+      const toggle = document.getElementById('navToggle');
+      const links  = document.getElementById('navLinks');
+      const close  = document.getElementById('navClose');
+      if (toggle && links) {
+        toggle.addEventListener('click', () => links.classList.add('open'));
+        if (close) close.addEventListener('click', () => links.classList.remove('open'));
+      }
 
       // Rebuild size chart rows when sizes field changes
       document.getElementById("pSizes").addEventListener("input", renderNewProductScBuilder);
