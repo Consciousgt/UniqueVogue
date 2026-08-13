@@ -27,54 +27,24 @@
       padding: 12px; margin: 20px 0; outline: none; font-family: monospace;
     }
 
-    /* Size chart builder grid */
-    .sc-builder { margin-top: 8px; }
-    .sc-builder-row {
-      display: grid; grid-template-columns: 60px 1fr 1fr 1fr 1fr 1fr;
-      gap: 8px; align-items: center; margin-bottom: 8px;
-    }
-    .sc-builder-row label {
-      font-size: 0.78rem; color: var(--gold); font-weight: 800;
-      text-align: center; padding: 9px 0;
-      background: rgba(197,160,89,0.1); border-radius: var(--r-sm);
-      border: 1px solid var(--border-gold);
-    }
-    .sc-builder-row input {
-      background: var(--black); border: 1px solid var(--border);
-      border-radius: var(--r-sm); padding: 8px 10px; color: #fff;
-      font-size: 0.84rem; font-family: var(--font-s); text-align: center;
-      transition: var(--ease); width: 100%;
-    }
-    .sc-builder-row input:focus { outline: none; border-color: var(--gold); }
-    .sc-col-headers {
-      display: grid; grid-template-columns: 60px 1fr 1fr 1fr 1fr 1fr;
-      gap: 8px; margin-bottom: 6px;
-    }
-    .sc-col-headers span {
-      font-size: 0.66rem; color: var(--grey-dim); text-align: center;
-      text-transform: uppercase; letter-spacing: 1px;
-    }
-
-    /* Edit size chart modal */
-    .edit-sc-overlay {
+    /* Size chart preview modal */
+    .sc-preview-overlay {
       display: none; position: fixed; inset: 0; z-index: 5000;
       background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
       align-items: center; justify-content: center; padding: 16px;
     }
-    .edit-sc-overlay.open { display: flex; }
-    .edit-sc-modal {
+    .sc-preview-overlay.open { display: flex; }
+    .sc-preview-modal {
       background: var(--black-card); border: 1px solid var(--border-gold);
-      border-radius: var(--r-lg); max-width: 700px; width: 100%;
-      max-height: 92vh; overflow-y: auto; padding: 28px;
-      box-shadow: var(--shadow);
+      border-radius: var(--r-lg); max-width: 600px; width: 100%;
+      padding: 26px; box-shadow: var(--shadow);
     }
-    .edit-sc-modal h3 { font-family: var(--font-d); color: var(--gold-light); margin-bottom: 4px; }
-    .edit-sc-modal p { color: var(--grey); font-size: 0.84rem; margin-bottom: 18px; }
-    @media(max-width: 640px) {
-      .sc-builder-row, .sc-col-headers { grid-template-columns: 48px 1fr 1fr 1fr; }
-      .sc-builder-row .sc-hip, .sc-builder-row .sc-len,
-      .sc-col-headers .sc-hip, .sc-col-headers .sc-len { display: none; }
-    }
+    .sc-preview-modal h3 { font-family: var(--font-d); color: var(--gold-light); margin-bottom: 6px; }
+    .sc-preview-modal p { color: var(--grey); font-size: 0.84rem; margin-bottom: 16px; }
+    .sc-prev-tbl { width: 100%; border-collapse: collapse; font-size: 0.86rem; text-align: center; }
+    .sc-prev-tbl thead th { background: var(--black); color: var(--gold); padding: 10px; font-size: 0.72rem; text-transform: uppercase; border-bottom: 1px solid var(--border-gold); }
+    .sc-prev-tbl td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--grey); }
+    .sc-prev-tbl td:first-child { font-weight: 700; color: var(--gold-light); text-align: left; }
   </style>
 </head>
 <body>
@@ -93,35 +63,36 @@
     </div>
   </div>
 
-  <!-- Edit Size Chart Modal -->
-  <div class="edit-sc-overlay" id="editScOverlay" onclick="closeEditSc(event)">
-    <div class="edit-sc-modal">
-      <h3><i class="fa-solid fa-ruler" style="color:var(--gold);margin-right:6px;"></i> Edit Size Chart</h3>
-      <p id="editScProductName">Fill in measurements for each size (in inches, e.g. 27", 17", 8", 40"). Leave blank to hide that column.</p>
+  <!-- Size Chart Preview Modal -->
+  <div class="sc-preview-overlay" id="scPreviewOverlay" onclick="closeScPreview(event)">
+    <div class="sc-preview-modal">
+      <h3><i class="fa-solid fa-ruler" style="color:var(--gold);margin-right:6px;"></i> Permanent Standard Size Chart</h3>
+      <p id="scPreviewTitle">This official measurement standard is permanently attached to all catalog products automatically.</p>
 
-      <div class="sc-builder-wrap">
-        <div class="sc-col-headers">
-          <span>Size</span>
-          <span>Length</span>
-          <span>Shoulder</span>
-          <span>Sleeve</span>
-          <span class="sc-hip">Chest</span>
-          <span class="sc-len">Waist</span>
-        </div>
-        <div class="sc-builder" id="editScBuilder">
-          <!-- Rows injected per product sizes -->
-        </div>
+      <div style="overflow-x:auto;">
+        <table class="sc-prev-tbl">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Size</th>
+              <th>Length</th>
+              <th>Shoulder</th>
+              <th>Sleeve</th>
+              <th>Chest</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>S</td><td>27"</td><td>17"</td><td>8"</td><td>40"</td></tr>
+            <tr><td>M</td><td>28"</td><td>18"</td><td>8.5"</td><td>42"</td></tr>
+            <tr><td>L</td><td>29"</td><td>19"</td><td>9"</td><td>44"</td></tr>
+            <tr><td>XL</td><td>30"</td><td>20"</td><td>9.5"</td><td>46"</td></tr>
+            <tr><td>2XL</td><td>31"</td><td>21"</td><td>10"</td><td>48"</td></tr>
+          </tbody>
+        </table>
       </div>
 
-      <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
-        <button class="btn btn-gold" onclick="saveEditSizeChart()">
-          <i class="fa-solid fa-check"></i> Save Size Chart
-        </button>
-        <button class="btn btn-outline" onclick="document.getElementById('editScOverlay').classList.remove('open')">
-          Cancel
-        </button>
-        <button class="btn btn-outline" style="border-color:rgba(230,57,70,0.4); color:#e63946;" onclick="clearSizeChart()">
-          <i class="fa-solid fa-trash-can"></i> Remove Chart
+      <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+        <button class="btn btn-gold" onclick="document.getElementById('scPreviewOverlay').classList.remove('open')">
+          Close Preview
         </button>
       </div>
     </div>
@@ -154,14 +125,25 @@
   <!-- Admin Header -->
   <div class="admin-head">
     <div class="container">
-      <h1 class="serif">Store Management Dashboard</h1>
-      <p>Upload new shirts, manage size charts, set prices, and track customer orders</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h1 class="serif">Store Management Dashboard</h1>
+          <p>Control products, catalog inventory, and track incoming customer orders.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a href="shop.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> View Live Store</a>
+          <button class="btn btn-gold btn-sm" onclick="document.getElementById('uploadFormSection').scrollIntoView({behavior:'smooth'})">
+            <i class="fa-solid fa-plus"></i> Upload New Product
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Admin Content Container -->
   <div class="container admin-wrap">
 
-    <!-- Metrics -->
+    <!-- KPI Metrics -->
     <div class="metrics">
       <div class="metric">
         <div class="metric-ico"><i class="fa-solid fa-naira-sign"></i></div>
@@ -173,12 +155,12 @@
       <div class="metric">
         <div class="metric-ico"><i class="fa-solid fa-shirt"></i></div>
         <div>
-          <div class="metric-val" id="metricProducts">0</div>
+          <div class="metric-val" id="metricProducts">5</div>
           <div class="metric-lbl">Active Products</div>
         </div>
       </div>
       <div class="metric">
-        <div class="metric-ico"><i class="fa-solid fa-receipt"></i></div>
+        <div class="metric-ico"><i class="fa-solid fa-bag-shopping"></i></div>
         <div>
           <div class="metric-val" id="metricOrders">0</div>
           <div class="metric-lbl">Orders Placed</div>
@@ -186,27 +168,31 @@
       </div>
     </div>
 
-    <!-- Upload New Product -->
-    <div class="admin-sec">
+    <!-- Upload New Product Section -->
+    <div class="admin-sec" id="uploadFormSection">
       <div class="admin-sec-head">
-        <div class="admin-sec-title"><i class="fa-solid fa-plus-circle"></i> Upload New Product / Arrival</div>
+        <div class="admin-sec-title"><i class="fa-solid fa-plus-circle"></i> Upload New Product to Store</div>
+        <span style="font-size:0.75rem; color:var(--grey-dim);">Instantly updates catalog for all customers</span>
       </div>
       <div class="admin-sec-body">
         <form id="adminUploadForm" onsubmit="handleAdminUpload(event)">
-          <div class="form-group">
-            <label>Product Title / Shirt Name *</label>
-            <input type="text" id="pTitle" class="form-ctrl" placeholder="e.g. Knit Shirt — Olive Green" required />
-          </div>
           <div class="form-row">
+            <div class="form-group">
+              <label>Product Name *</label>
+              <input type="text" id="pTitle" class="form-ctrl" placeholder="e.g. Knit Shirt — Olive Green" required />
+            </div>
             <div class="form-group">
               <label>Category *</label>
               <select id="pCategory" class="form-ctrl">
                 <option value="Clothes">Clothes</option>
-                <option value="Accessories">Accessories</option>
+                <option value="Knit Shirts">Knit Shirts</option>
+                <option value="Vintage Shirts">Vintage Shirts</option>
               </select>
             </div>
+          </div>
+          <div class="form-row">
             <div class="form-group">
-              <label>Badge / Tag</label>
+              <label>Badge Tag</label>
               <select id="pBadge" class="form-ctrl">
                 <option value="New Arrival">New Arrival</option>
                 <option value="Bestseller">Bestseller</option>
@@ -215,8 +201,6 @@
                 <option value="Limited Edition">Limited Edition</option>
               </select>
             </div>
-          </div>
-          <div class="form-row">
             <div class="form-group">
               <label>Price (₦) *</label>
               <input type="number" id="pPrice" class="form-ctrl" placeholder="15000" min="0" required />
@@ -228,7 +212,7 @@
           </div>
           <div class="form-group">
             <label>Available Sizes (comma-separated)</label>
-            <input type="text" id="pSizes" class="form-ctrl" value="S, M, L, XL, XXL" />
+            <input type="text" id="pSizes" class="form-ctrl" value="S, M, L, XL, 2XL" />
           </div>
           <div class="form-group">
             <label>Product Photo</label>
@@ -246,26 +230,15 @@
             <textarea id="pDesc" class="form-ctrl" rows="3" placeholder="Describe the texture, collar style, fabric, and fit..." required></textarea>
           </div>
 
-          <!-- Size Chart Builder for new product -->
-          <div class="form-group">
-            <label style="display:flex; align-items:center; justify-content:space-between;">
-              <span>Size Chart Measurements <span style="color:var(--grey-dim); font-weight:400;">(optional)</span></span>
-              <span style="font-size:0.72rem; color:var(--grey-dim);">in inches (")</span>
-            </label>
-            <div class="sc-builder-wrap">
-              <div class="sc-col-headers">
-                <span>Size</span>
-                <span>Length</span>
-                <span>Shoulder</span>
-                <span>Sleeve</span>
-                <span class="sc-hip">Chest</span>
-                <span class="sc-len">Waist</span>
-              </div>
-              <div class="sc-builder" id="newProductScBuilder">
-                <!-- Rendered by JS when sizes field changes -->
-              </div>
+          <!-- Permanent Size Chart Notice -->
+          <div style="background:rgba(197,160,89,0.08); border:1px solid var(--border-gold); border-radius:var(--r-md); padding:14px 16px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px; font-size:0.84rem; color:var(--gold-light);">
+              <i class="fa-solid fa-circle-check" style="color:var(--gold); font-size:1.1rem;"></i>
+              <span><strong>Official Standard Size Chart</strong> (Length, Shoulder, Sleeve, Chest) is permanently assigned automatically.</span>
             </div>
-            <p style="font-size:0.74rem; color:var(--grey-dim); margin-top:6px;">Leave blank to skip size chart. You can add it later from the catalog table.</p>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openPreviewPermanentSizeChart('New Product')">
+              <i class="fa-solid fa-eye"></i> View Chart
+            </button>
           </div>
 
           <button type="submit" class="btn btn-gold btn-full" style="padding:14px;">
@@ -288,7 +261,7 @@
           <thead>
             <tr>
               <th>Image</th>
-              <th>Shirt Name & Sizes</th>
+              <th>Shirt Name &amp; Sizes</th>
               <th>Category</th>
               <th>Price</th>
               <th>Stock</th>
@@ -323,31 +296,16 @@
 
   <script src="js/app.js"></script>
   <script src="js/products.js"></script>
-  <script src="js/cart.js"></script>
   <script src="js/admin.js"></script>
 
   <script>
     let adminBase64Image = "";
-    let editingProductId  = null;
-
-    /* ── PIN Security ── */
-    function checkOwnerPin() {
-      const pin = document.getElementById("pinInput").value.trim();
-      if (pin === "1234" || pin === "") {
-        document.getElementById("pinOverlay").style.display = "none";
-        sessionStorage.setItem("uv_owner_unlocked", "true");
-        App.showToast("Dashboard unlocked!");
-      } else {
-        App.showToast("Incorrect PIN. Try 1234", "error");
-      }
-    }
 
     document.addEventListener("DOMContentLoaded", () => {
       if (sessionStorage.getItem("uv_owner_unlocked") === "true") {
         document.getElementById("pinOverlay").style.display = "none";
+        AdminManager.initAdminDashboard();
       }
-      AdminManager.initAdminDashboard();
-      renderNewProductScBuilder();
 
       document.getElementById("pinInput").addEventListener("keyup", e => {
         if (e.key === "Enter") checkOwnerPin();
@@ -361,56 +319,32 @@
         toggle.addEventListener('click', () => links.classList.add('open'));
         if (close) close.addEventListener('click', () => links.classList.remove('open'));
       }
-
-      // Rebuild size chart rows when sizes field changes
-      document.getElementById("pSizes").addEventListener("input", renderNewProductScBuilder);
     });
 
-    /* ── File Preview ── */
+    function checkOwnerPin() {
+      const pin = document.getElementById("pinInput").value;
+      if (pin === "1234") {
+        sessionStorage.setItem("uv_owner_unlocked", "true");
+        document.getElementById("pinOverlay").style.display = "none";
+        AdminManager.initAdminDashboard();
+        App.showToast("Welcome to Owner Dashboard!");
+      } else {
+        App.showToast("Incorrect PIN. Please try again.", "error");
+        document.getElementById("pinInput").value = "";
+      }
+    }
+
     function handleAdminFileSelect(e) {
-      const file = e.target.files[0]; if (!file) return;
+      const file = e.target.files[0];
+      if (!file) return;
       const reader = new FileReader();
-      reader.onload = evt => {
-        adminBase64Image = evt.target.result;
+      reader.onload = (event) => {
+        adminBase64Image = event.target.result;
         const thumb = document.getElementById("adminPreviewThumb");
-        thumb.src = adminBase64Image; thumb.style.display = "block";
+        thumb.src = adminBase64Image;
+        thumb.style.display = "block";
       };
       reader.readAsDataURL(file);
-    }
-
-    /* ── New Product Size Chart Builder ── */
-    function renderNewProductScBuilder() {
-      const sizesRaw = document.getElementById("pSizes").value;
-      const sizes = sizesRaw.split(",").map(s => s.trim()).filter(Boolean);
-      const container = document.getElementById("newProductScBuilder");
-      container.innerHTML = sizes.map(sz => buildScRow(sz, "new")).join('');
-    }
-
-    function buildScRow(sz, prefix, data = {}) {
-      return `
-        <div class="sc-builder-row">
-          <label>${sz}</label>
-          <input type="text" placeholder='27"' value="${data.length||''}" id="${prefix}-sc-length-${sz}" />
-          <input type="text" placeholder='17"' value="${data.shoulder||''}" id="${prefix}-sc-shoulder-${sz}" />
-          <input type="text" placeholder='8"' value="${data.sleeve||''}" id="${prefix}-sc-sleeve-${sz}" />
-          <input type="text" placeholder='40"' value="${data.chest||''}" id="${prefix}-sc-chest-${sz}" class="sc-hip" />
-          <input type="text" placeholder='—' value="${data.waist||''}" id="${prefix}-sc-waist-${sz}" class="sc-len" />
-        </div>`;
-    }
-
-    function readScBuilderData(sizes, prefix) {
-      const measurements = [];
-      sizes.forEach(sz => {
-        const length   = document.getElementById(`${prefix}-sc-length-${sz}`)?.value.trim() || '';
-        const shoulder = document.getElementById(`${prefix}-sc-shoulder-${sz}`)?.value.trim() || '';
-        const sleeve   = document.getElementById(`${prefix}-sc-sleeve-${sz}`)?.value.trim() || '';
-        const chest    = document.getElementById(`${prefix}-sc-chest-${sz}`)?.value.trim() || '';
-        const waist    = document.getElementById(`${prefix}-sc-waist-${sz}`)?.value.trim() || '';
-        if (length || shoulder || sleeve || chest || waist) {
-          measurements.push({ size: sz, length, shoulder, sleeve, chest, waist });
-        }
-      });
-      return measurements.length > 0 ? { unit: 'inches', measurements } : null;
     }
 
     /* ── Upload New Product ── */
@@ -424,64 +358,44 @@
       const desc     = document.getElementById("pDesc").value.trim();
       const urlInput = document.getElementById("pImageUrl").value.trim();
       const sizesRaw = document.getElementById("pSizes").value.trim();
-      const sizes    = sizesRaw ? sizesRaw.split(",").map(s => s.trim()).filter(Boolean) : ["S","M","L","XL","XXL"];
+      const sizes    = sizesRaw ? sizesRaw.split(",").map(s => s.trim()).filter(Boolean) : ["S","M","L","XL","2XL"];
       const imageSrc = adminBase64Image || urlInput || "images/shirt-black-knit.jpg";
-      const sizeChart = readScBuilderData(sizes, "new");
 
-      ProductsAPI.addProduct({ name: title, category, price, image: imageSrc, badge, stock, sizes, description: desc, sizeChart });
+      ProductsAPI.addProduct({
+        name: title,
+        category,
+        price,
+        image: imageSrc,
+        badge,
+        stock,
+        sizes,
+        description: desc
+      });
+
       document.getElementById("adminUploadForm").reset();
       document.getElementById("adminPreviewThumb").style.display = "none";
-      document.getElementById("pSizes").value = "S, M, L, XL, XXL";
+      document.getElementById("pSizes").value = "S, M, L, XL, 2XL";
       adminBase64Image = "";
-      renderNewProductScBuilder();
-      App.showToast(`Published "${title}" to catalog!`);
+
+      App.showToast(`Published "${title}" to catalog with permanent size chart!`);
       AdminManager.initAdminDashboard();
       document.getElementById("catalogSection").scrollIntoView({ behavior: "smooth" });
     }
 
-    /* ── Edit Size Chart for existing product ── */
-    function openEditSizeChart(id) {
-      const p = ProductsAPI.getProductById(id);
-      if (!p) return;
-      editingProductId = id;
-      document.getElementById("editScProductName").textContent = p.name;
-      const builder = document.getElementById("editScBuilder");
-      const sizes   = p.sizes || ["S","M","L","XL","XXL"];
-      const existing = {};
-      if (p.sizeChart && p.sizeChart.measurements) {
-        p.sizeChart.measurements.forEach(r => { existing[r.size] = r; });
+    /* ── Preview Permanent Size Chart Modal ── */
+    function openPreviewPermanentSizeChart(prodName) {
+      document.getElementById("scPreviewTitle").textContent = `Official measurements for ${prodName} (Length, Shoulder, Sleeve, Chest in inches).`;
+      document.getElementById("scPreviewOverlay").classList.add("open");
+    }
+
+    function closeScPreview(e) {
+      if (e.target === document.getElementById("scPreviewOverlay")) {
+        document.getElementById("scPreviewOverlay").classList.remove("open");
       }
-      builder.innerHTML = sizes.map(sz => buildScRow(sz, "edit", existing[sz] || {})).join('');
-      document.getElementById("editScOverlay").classList.add("open");
-    }
-
-    function closeEditSc(e) {
-      if (e.target === document.getElementById("editScOverlay")) {
-        document.getElementById("editScOverlay").classList.remove("open");
-      }
-    }
-
-    function saveEditSizeChart() {
-      const p = ProductsAPI.getProductById(editingProductId);
-      if (!p) return;
-      const sizes = p.sizes || ["S","M","L","XL","XXL"];
-      const sizeChart = readScBuilderData(sizes, "edit") || { unit: 'cm', measurements: [] };
-      ProductsAPI.updateProduct(editingProductId, { sizeChart });
-      App.showToast("Size chart updated!");
-      document.getElementById("editScOverlay").classList.remove("open");
-      AdminManager.initAdminDashboard();
-    }
-
-    function clearSizeChart() {
-      if (!confirm("Remove the size chart from this product?")) return;
-      ProductsAPI.updateProduct(editingProductId, { sizeChart: null });
-      App.showToast("Size chart removed");
-      document.getElementById("editScOverlay").classList.remove("open");
-      AdminManager.initAdminDashboard();
     }
 
     function confirmResetCatalog() {
-      if (confirm("Reset catalog to the 5 official shirts? Custom uploads will be cleared.")) {
+      if (confirm("Reset catalog back to the official 5 Unified Vogue shirts?")) {
         ProductsAPI.resetCatalog();
         App.showToast("Catalog reset to official 5 shirts");
         AdminManager.initAdminDashboard();
@@ -489,9 +403,9 @@
     }
 
     function confirmClearOrders() {
-      if (confirm("Clear all recorded customer orders?")) {
-        localStorage.removeItem("uv_orders_history");
-        App.showToast("All orders cleared");
+      if (confirm("Are you sure you want to clear all customer orders history?")) {
+        localStorage.setItem("uv_orders_history", "[]");
+        App.showToast("Orders history cleared");
         AdminManager.initAdminDashboard();
       }
     }

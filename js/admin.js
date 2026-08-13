@@ -37,13 +37,12 @@ class AdminManager {
     }
 
     tbody.innerHTML = products.map(p => {
-      const hasChart = p.sizeChart && p.sizeChart.measurements && p.sizeChart.measurements.length > 0;
       return `
       <tr>
         <td><img src="${p.image}" alt="${p.name}" onerror="this.src='images/logo.jpg'" /></td>
         <td>
           <div class="admin-prod-name">${p.name}</div>
-          <div style="font-size:0.72rem; color:var(--grey-dim);">${p.sizes ? p.sizes.join(', ') : 'S, M, L, XL'}</div>
+          <div style="font-size:0.72rem; color:var(--grey-dim);">${p.sizes ? p.sizes.join(', ') : 'S, M, L, XL, 2XL'}</div>
         </td>
         <td><span class="admin-cat">${p.category}</span></td>
         <td class="admin-price">${App.formatMoney(p.price)}</td>
@@ -52,9 +51,10 @@ class AdminManager {
           <span style="font-size:0.75rem; color:var(--grey-dim);">in stock</span>
         </td>
         <td>
-          <button onclick="openEditSizeChart('${p.id}')"
-            style="display:inline-flex; align-items:center; gap:5px; background:${hasChart ? 'rgba(197,160,89,0.12)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${hasChart ? 'var(--border-gold)' : 'var(--border)'}; color:${hasChart ? 'var(--gold)' : 'var(--grey-dim)'}; padding:5px 12px; border-radius:var(--r-full); font-size:0.74rem; font-weight:700; cursor:pointer; font-family:var(--font-s); transition:var(--ease);">
-            <i class="fa-solid fa-ruler"></i> ${hasChart ? 'Edit Chart' : 'Add Chart'}
+          <button type="button" onclick="openPreviewPermanentSizeChart('${p.name}')"
+            style="display:inline-flex; align-items:center; gap:5px; background:rgba(197,160,89,0.12); border:1px solid var(--border-gold); color:var(--gold); padding:5px 12px; border-radius:var(--r-full); font-size:0.74rem; font-weight:700; cursor:pointer; font-family:var(--font-s); transition:var(--ease);"
+            title="Permanent Standard Size Chart (Length, Shoulder, Sleeve, Chest in inches)">
+            <i class="fa-solid fa-circle-check"></i> Standard Chart
           </button>
         </td>
         <td>

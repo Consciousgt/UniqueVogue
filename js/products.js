@@ -1,5 +1,5 @@
 /* ==========================================================================
-   UNIFIED VOGUE — OFFICIAL PRODUCT CATALOG WITH INCH SIZE CHART
+   UNIFIED VOGUE — OFFICIAL PRODUCT CATALOG WITH PERMANENT SIZE CHART
    ========================================================================== */
 
 const OFFICIAL_SIZE_CHART = {
@@ -81,15 +81,25 @@ const OFFICIAL_CATALOG = [
   }
 ];
 
-const DB_KEY = "uv_vogue_catalog_v6";
+const DB_KEY = "uv_vogue_catalog_v8";
 
 class ProductsAPI {
+  static getPermanentSizeChart() {
+    return OFFICIAL_SIZE_CHART;
+  }
+
   static getProducts() {
     const stored = localStorage.getItem(DB_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Ensure all products permanently have the official size chart
+          return parsed.map(p => ({
+            ...p,
+            sizeChart: OFFICIAL_SIZE_CHART
+          }));
+        }
       } catch (e) {}
     }
     this.saveProducts(OFFICIAL_CATALOG);
@@ -97,11 +107,19 @@ class ProductsAPI {
   }
 
   static saveProducts(products) {
-    localStorage.setItem(DB_KEY, JSON.stringify(products));
+    const standardized = products.map(p => ({
+      ...p,
+      sizeChart: OFFICIAL_SIZE_CHART
+    }));
+    localStorage.setItem(DB_KEY, JSON.stringify(standardized));
   }
 
   static getProductById(id) {
-    return this.getProducts().find(p => p.id === id);
+    const product = this.getProducts().find(p => p.id === id);
+    if (product) {
+      product.sizeChart = OFFICIAL_SIZE_CHART;
+    }
+    return product;
   }
 
   static addProduct(productData) {
@@ -110,10 +128,11 @@ class ProductsAPI {
       id: "uv-" + Date.now(),
       rating: 5.0,
       stock: productData.stock || 10,
-      sizes: productData.sizes || ["S", "M", "L", "XL", "2XL"],
-      sizeChart: productData.sizeChart || OFFICIAL_SIZE_CHART,
+      sizes: productData.sizes && productData.sizes.length > 0 ? productData.sizes : ["S", "M", "L", "XL", "2XL"],
+      sizeChart: OFFICIAL_SIZE_CHART,
       ...productData
     };
+    newProd.sizeChart = OFFICIAL_SIZE_CHART;
     products.unshift(newProd);
     this.saveProducts(products);
     return newProd;
@@ -123,7 +142,7 @@ class ProductsAPI {
     let products = this.getProducts();
     const idx = products.findIndex(p => p.id === id);
     if (idx !== -1) {
-      products[idx] = { ...products[idx], ...updatedData };
+      products[idx] = { ...products[idx], ...updatedData, sizeChart: OFFICIAL_SIZE_CHART };
       this.saveProducts(products);
       return products[idx];
     }
