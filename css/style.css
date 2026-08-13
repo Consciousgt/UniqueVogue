@@ -417,30 +417,62 @@ ul { list-style:none; }
   font-size:0.85rem;
 }
 .cart-panel-head h2 { font-size:1.05rem; font-weight:600; }
-.cart-panel-head a { color:var(--grey-dim); font-size:0.8rem; }
-.cart-panel-head a:hover { color:var(--gold); }
-.cart-tbl { width:100%; border-collapse:collapse; }
-.cart-tbl thead th {
-  padding:13px 18px; font-size:0.68rem; text-transform:uppercase;
-  letter-spacing:1.5px; color:var(--grey-dim); font-weight:700; text-align:left;
-  border-bottom:1px solid var(--border); background:rgba(255,255,255,0.015);
+/* ── SHOPPING BAG (MULTIDYNAMIC LUXURY CARDS) ── */
+.bag-list { display: flex; flex-direction: column; gap: 14px; padding: 22px; }
+.bag-card {
+  display: grid;
+  grid-template-columns: 76px 1fr auto auto;
+  align-items: center;
+  gap: 18px;
+  background: rgba(255,255,255,0.015);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  transition: var(--ease);
 }
-.cart-tbl tbody tr { border-bottom:1px solid var(--border); transition:background 0.2s; }
-.cart-tbl tbody tr:last-child { border-bottom:none; }
-.cart-tbl tbody tr:hover { background:rgba(255,255,255,0.015); }
-.cart-tbl td { padding:16px 18px; vertical-align:middle; }
-.cart-item-cell { display:flex; gap:12px; align-items:center; }
-.cart-item-img { width:56px; height:64px; border-radius:var(--r-sm); object-fit:cover; object-position:center top; border:1px solid var(--border); flex-shrink:0; }
-.cart-item-name { font-weight:600; font-size:0.88rem; margin-bottom:2px; }
-.cart-item-meta { font-size:0.73rem; color:var(--grey-dim); }
-.cart-price { font-size:0.92rem; font-weight:600; }
-.cart-total { font-size:0.98rem; font-weight:700; color:var(--gold-light); }
-.qty-inline { display:flex; align-items:center; background:var(--black); border:1px solid var(--border); border-radius:var(--r-full); overflow:hidden; width:fit-content; }
-.qi-btn { background:none; border:none; color:#fff; width:28px; height:28px; font-size:0.95rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:var(--ease); }
-.qi-btn:hover { color:var(--gold); }
-.qi-num { min-width:26px; text-align:center; font-size:0.85rem; font-weight:700; }
-.rm-btn { background:none; border:none; color:var(--grey-dim); cursor:pointer; font-size:0.85rem; padding:6px; border-radius:50%; transition:var(--ease); }
-.rm-btn:hover { color:#e63946; background:rgba(230,57,70,0.08); }
+.bag-card:hover { border-color: var(--border-gold); background: rgba(197,160,89,0.02); }
+.bag-card-img {
+  width: 76px; height: 90px; border-radius: var(--r-sm);
+  object-fit: cover; object-position: center top;
+  border: 1px solid var(--border); flex-shrink: 0;
+}
+.bag-card-info { display: flex; flex-direction: column; gap: 4px; }
+.bag-card-title { font-family: var(--font-d); font-size: 0.98rem; font-weight: 600; color: #fff; line-height: 1.3; }
+.bag-card-cat { font-size: 0.66rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+.bag-size-wrap { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.bag-size-lbl { font-size: 0.72rem; color: var(--grey-dim); }
+.bag-size-sel {
+  background: var(--black); border: 1px solid var(--border-gold);
+  color: var(--gold-light); font-size: 0.76rem; font-weight: 700;
+  border-radius: var(--r-full); padding: 3px 10px; cursor: pointer;
+  font-family: var(--font-s); outline: none; transition: var(--ease);
+}
+.bag-size-sel:hover, .bag-size-sel:focus { border-color: var(--gold); background: rgba(197,160,89,0.1); }
+.bag-card-price-block { text-align: right; min-width: 100px; }
+.bag-unit-price { font-size: 0.75rem; color: var(--grey-dim); margin-bottom: 2px; }
+.bag-total-price { font-size: 1.05rem; font-weight: 700; color: var(--gold-light); }
+.bag-stepper {
+  display: inline-flex; align-items: center;
+  background: var(--black); border: 1px solid var(--border);
+  border-radius: var(--r-full); overflow: hidden;
+}
+.bag-step-btn {
+  background: none; border: none; color: #fff;
+  width: 32px; height: 32px; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: var(--ease);
+}
+.bag-step-btn:hover { color: var(--gold); background: rgba(197,160,89,0.1); }
+.bag-step-num { min-width: 28px; text-align: center; font-weight: 700; font-size: 0.88rem; }
+.bag-del-btn {
+  background: none; border: 1px solid transparent; color: var(--grey-dim);
+  cursor: pointer; width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.88rem; transition: var(--ease);
+}
+.bag-del-btn:hover { color: #e63946; background: rgba(230,57,70,0.1); border-color: rgba(230,57,70,0.3); }
+
+/* Cart empty & summary */
 .cart-empty { padding:60px 20px; text-align:center; }
 .cart-empty i { font-size:3.2rem; color:var(--border-gold); display:block; margin-bottom:16px; }
 .cart-empty h3 { font-size:1.4rem; margin-bottom:7px; }
@@ -455,6 +487,30 @@ ul { list-style:none; }
 .summary-total span:last-child { color:var(--gold-light); font-size:1.08rem; }
 .summary-note { margin-top:14px; font-size:0.74rem; color:var(--grey-dim); text-align:center; display:flex; align-items:center; justify-content:center; gap:5px; }
 .summary-note i { color:var(--gold); }
+
+@media(max-width: 768px) {
+  .bag-list { padding: 12px; gap: 12px; }
+  .bag-card {
+    grid-template-columns: 70px 1fr;
+    grid-template-areas:
+      "img info"
+      "actions actions";
+    gap: 12px;
+    padding: 14px 12px;
+  }
+  .bag-card-img { grid-area: img; width: 70px; height: 84px; }
+  .bag-card-info { grid-area: info; }
+  .bag-card-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255,255,255,0.08);
+  }
+}
 
 /* ── CHECKOUT ── */
 .co-wrap { padding:44px 0 80px; }

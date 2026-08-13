@@ -4,13 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shopping Bag — Unified Vogue</title>
-  <meta name="description" content="Your shopping bag at Unified Vogue."/>
+  <meta name="description" content="Your luxury fashion shopping bag at Unified Vogue."/>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -41,7 +40,7 @@
           <i class="fa-solid fa-bag-shopping"></i>
           <span class="nav-badge" id="navCartBadge">0</span>
         </a>
-        <button class="nav-toggle" id="navToggle"><i class="fa-solid fa-bars"></i></button>
+        <button class="nav-toggle" id="navToggle" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>
       </div>
     </div>
   </nav>
@@ -50,7 +49,7 @@
   <div class="cart-header">
     <div class="container">
       <h1 class="serif">Your Shopping Bag</h1>
-      <p>Review items in your bag before proceeding to checkout</p>
+      <p>Review and customize items in your bag before checkout</p>
     </div>
   </div>
 
@@ -59,7 +58,7 @@
     <div>
       <div class="cart-panel">
         <div class="cart-panel-head">
-          <h2>Selected Items <span id="cartCountLabel" style="color:var(--grey-dim);"></span></h2>
+          <h2>Bag Items <span id="cartCountLabel" style="color:var(--grey-dim);"></span></h2>
           <div style="display:flex; gap:12px; align-items:center;">
             <button class="btn btn-outline btn-sm" onclick="clearFullBag()" id="clearBagBtn" style="display:none; font-size:0.75rem; border-color:rgba(230,57,70,0.4); color:#e63946;">
               <i class="fa-solid fa-trash-can"></i> Clear Bag
@@ -69,7 +68,7 @@
         </div>
 
         <div id="cartBody">
-          <!-- Injected via JS -->
+          <!-- Injected dynamically via JS -->
         </div>
       </div>
     </div>
@@ -79,7 +78,7 @@
         <div class="summary-title">Order Summary</div>
 
         <div class="summary-row">
-          <span>Items Count</span>
+          <span>Items Breakdown</span>
           <span id="itemsQtyVal">0 items</span>
         </div>
         <div class="summary-row">
@@ -107,7 +106,7 @@
         </a>
 
         <div class="summary-note">
-          <i class="fa-solid fa-lock"></i> Direct Bank Transfer Payment
+          <i class="fa-solid fa-lock"></i> Direct Bank Transfer Payment (Opay)
         </div>
       </div>
     </div>
@@ -118,6 +117,7 @@
     <div class="container">
       <div class="footer-bottom">
         <span>&copy; 2026 Unified Vogue. All Rights Reserved.</span>
+        <a href="shop.html" style="color:var(--gold);">← Back to Shop</a>
       </div>
     </div>
   </footer>
@@ -127,6 +127,8 @@
   <script src="js/cart.js"></script>
 
   <script>
+    const DEFAULT_SIZES = ["S", "M", "L", "XL", "2XL"];
+
     function renderCart() {
       const cart = CartManager.getCart();
       const body = document.getElementById('cartBody');
@@ -134,7 +136,7 @@
       const checkoutBtn = document.getElementById('checkoutBtn');
       const clearBtn = document.getElementById('clearBagBtn');
 
-      const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+      const totalQty = cart.reduce((s, i) => s + Number(i.qty), 0);
       const uniqueItems = cart.length;
 
       countLabel.textContent = totalQty > 0 ? `(${totalQty} item${totalQty > 1 ? 's' : ''})` : '';
@@ -144,8 +146,11 @@
           <div class="cart-empty">
             <i class="fa-solid fa-bag-shopping"></i>
             <h3 class="serif">Your bag is empty</h3>
-            <p>Add some stylish shirts to your bag to get started.</p>
-            <a href="shop.html" class="btn btn-gold">Explore Collection</a>
+            <p>You haven't added any luxury shirts to your bag yet.</p>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+              <a href="shop.html" class="btn btn-gold">Explore Full Collection</a>
+              <a href="index.html#featuredSection" class="btn btn-outline">View Lookbook</a>
+            </div>
           </div>`;
         document.getElementById('itemsQtyVal').textContent = '0 items';
         document.getElementById('subTotalVal').textContent = App.formatMoney(0);
@@ -162,54 +167,52 @@
 
       let subtotal = 0;
 
-      const rows = cart.map(item => {
+      const cardsHtml = cart.map(item => {
         const itemTot = Number(item.price) * Number(item.qty);
         subtotal += itemTot;
+        const prod = ProductsAPI.getProductById(item.id);
+        const sizesList = (prod && prod.sizes && prod.sizes.length > 0) ? prod.sizes : (item.availableSizes || DEFAULT_SIZES);
+
         return `
-          <tr>
-            <td>
-              <div class="cart-item-cell">
-                <img class="cart-item-img" src="${item.image}" alt="${item.name}" onerror="this.src='images/logo.jpg'" />
-                <div>
-                  <div class="cart-item-name">${item.name}</div>
-                  <div class="cart-item-meta">Size: <strong style="color:var(--gold);">${item.size}</strong></div>
-                </div>
+          <div class="bag-card">
+            <a href="product.html?id=${item.id}">
+              <img class="bag-card-img" src="${item.image}" alt="${item.name}" onerror="this.src='images/logo.jpg'" />
+            </a>
+
+            <div class="bag-card-info">
+              <span class="bag-card-cat">${item.category || 'Clothes'}</span>
+              <a href="product.html?id=${item.id}" class="bag-card-title">${item.name}</a>
+              <div class="bag-size-wrap">
+                <span class="bag-size-lbl">Size:</span>
+                <select class="bag-size-sel" onchange="handleSizeChange('${item.id}', '${item.size}', this.value)" title="Change Size">
+                  ${sizesList.map(sz => `
+                    <option value="${sz}" ${sz === item.size ? 'selected' : ''}>${sz}</option>
+                  `).join('')}
+                </select>
+                <span style="font-size:0.75rem; color:var(--grey-dim); margin-left:6px;">${App.formatMoney(item.price)} each</span>
               </div>
-            </td>
-            <td class="cart-price">${App.formatMoney(item.price)}</td>
-            <td>
-              <div class="qi-inline">
-                <button class="qi-btn" onclick="updateQty('${item.id}','${item.size}',-1)">−</button>
-                <span class="qi-num">${item.qty}</span>
-                <button class="qi-btn" onclick="updateQty('${item.id}','${item.size}',1)">+</button>
+            </div>
+
+            <div class="bag-stepper">
+              <button class="bag-step-btn" onclick="updateQty('${item.id}', '${item.size}', -1)" title="Decrease Quantity">−</button>
+              <span class="bag-step-num">${item.qty}</span>
+              <button class="bag-step-btn" onclick="updateQty('${item.id}', '${item.size}', 1)" title="Increase Quantity">+</button>
+            </div>
+
+            <div class="bag-card-price-block">
+              <div class="bag-unit-price">${item.qty} × ${App.formatMoney(item.price)}</div>
+              <div class="bag-total-price">${App.formatMoney(itemTot)}</div>
+              <div style="margin-top:6px;">
+                <button class="bag-del-btn" onclick="removeItem('${item.id}', '${item.size}')" title="Remove Item">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
               </div>
-            </td>
-            <td class="cart-total">${App.formatMoney(itemTot)}</td>
-            <td>
-              <button class="rm-btn" title="Remove Item" onclick="removeItem('${item.id}','${item.size}')">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
+            </div>
+          </div>
         `;
       }).join('');
 
-      body.innerHTML = `
-        <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-          <table class="cart-tbl">
-            <thead>
-              <tr>
-                <th>Item Details</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      `;
+      body.innerHTML = `<div class="bag-list">${cardsHtml}</div>`;
 
       document.getElementById('itemsQtyVal').textContent = `${totalQty} item${totalQty > 1 ? 's' : ''} (${uniqueItems} product${uniqueItems > 1 ? 's' : ''})`;
       document.getElementById('subTotalVal').textContent = App.formatMoney(subtotal);
@@ -221,13 +224,18 @@
       renderCart();
     }
 
+    function handleSizeChange(id, oldSize, newSize) {
+      CartManager.changeSize(id, oldSize, newSize);
+      renderCart();
+    }
+
     function removeItem(id, size) {
       CartManager.removeFromCart(id, size);
       renderCart();
     }
 
     function clearFullBag() {
-      if (confirm("Remove all items from your shopping bag?")) {
+      if (confirm("Are you sure you want to clear your entire shopping bag?")) {
         CartManager.saveCart([]);
         renderCart();
         App.showToast("Shopping bag cleared");

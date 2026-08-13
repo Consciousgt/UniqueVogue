@@ -1,5 +1,5 @@
 /* ==========================================================================
-   UNIFIED VOGUE — SHOPPING BAG ENGINE
+   UNIFIED VOGUE — SHOPPING BAG ENGINE (MULTIDYNAMIC)
    ========================================================================== */
 
 class CartManager {
@@ -31,7 +31,8 @@ class CartManager {
         price: product.price,
         image: product.image,
         qty: qty,
-        size: size
+        size: size,
+        availableSizes: product.sizes || ["S", "M", "L", "XL", "2XL"]
       });
     }
 
@@ -46,16 +47,36 @@ class CartManager {
       item.qty += delta;
       if (item.qty <= 0) {
         cart = cart.filter(i => !(i.id === productId && i.size === size));
+        App.showToast(`Removed "${item.name}" from bag`);
       }
       this.saveCart(cart);
     }
   }
 
+  static changeSize(productId, oldSize, newSize) {
+    if (!newSize || oldSize === newSize) return;
+    let cart = this.getCart();
+    const itemIdx = cart.findIndex(i => i.id === productId && i.size === oldSize);
+    if (itemIdx === -1) return;
+
+    const existingNewSizeIdx = cart.findIndex(i => i.id === productId && i.size === newSize);
+    if (existingNewSizeIdx > -1 && existingNewSizeIdx !== itemIdx) {
+      cart[existingNewSizeIdx].qty += cart[itemIdx].qty;
+      cart.splice(itemIdx, 1);
+    } else {
+      cart[itemIdx].size = newSize;
+    }
+
+    this.saveCart(cart);
+    App.showToast(`Size updated to ${newSize}`);
+  }
+
   static removeFromCart(productId, size) {
     let cart = this.getCart();
+    const item = cart.find(i => i.id === productId && i.size === size);
     cart = cart.filter(i => !(i.id === productId && i.size === size));
     this.saveCart(cart);
-    App.showToast("Item removed from bag");
+    App.showToast(item ? `Removed "${item.name}" (${size})` : "Item removed from bag");
   }
 
   static updateBadges() {
@@ -63,7 +84,10 @@ class CartManager {
     const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
 
     const cartBadge = document.getElementById("navCartBadge");
-    if (cartBadge) cartBadge.innerText = totalQty;
+    if (cartBadge) {
+      cartBadge.innerText = totalQty;
+      cartBadge.style.display = totalQty > 0 ? "flex" : "none";
+    }
   }
 }
 
