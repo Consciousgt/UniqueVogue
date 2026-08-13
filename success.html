@@ -28,16 +28,18 @@
 
   <div class="success-page">
     <div class="success-card">
-      <div class="success-icon">
+      <div class="success-icon" id="successIcon">
         <i class="fa-solid fa-check"></i>
       </div>
 
-      <h1 class="serif">Order Received!</h1>
+      <h1 class="serif" id="successHeading">Order Initiated!</h1>
       <p>Thank you for shopping with <strong>Unified Vogue</strong>.</p>
-      <p>Your payment reference code is:</p>
+      <p>Your order reference code is:</p>
       <div class="ref-code" id="refDisplay">UV-XXXXXX-PAY</div>
 
-      <div class="steps-box">
+      <div id="orderStatusBadge" style="margin-bottom:14px;"></div>
+
+      <div class="steps-box" id="stepsBox">
         <h4>What to do next:</h4>
         <div class="step">
           <span class="step-num">1</span>
@@ -58,7 +60,11 @@
         Send Payment Receipt on WhatsApp
       </a>
 
-      <a href="index.html" class="btn btn-outline btn-full" style="margin-top: 10px;">
+      <button id="cancelOrderBtn" class="btn btn-outline btn-full" onclick="cancelCustomerOrder()" style="border-color:rgba(230,57,70,0.4); color:#e63946; margin-bottom:8px;">
+        <i class="fa-solid fa-ban"></i> Cancel This Order
+      </button>
+
+      <a href="index.html" class="btn btn-outline btn-full">
         <i class="fa-solid fa-house"></i> Return to Main Store
       </a>
     </div>
@@ -66,14 +72,54 @@
 
   <script src="js/app.js"></script>
   <script>
+    let currentRef = '';
+
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const ref = urlParams.get('ref') || 'UV-894021-PAY';
+      currentRef = urlParams.get('ref') || 'UV-894021-PAY';
       const waUrl = urlParams.get('wa') || `https://wa.me/2349126284759`;
 
-      document.getElementById('refDisplay').textContent = ref;
+      document.getElementById('refDisplay').textContent = currentRef;
       document.getElementById('waBtn').setAttribute('href', decodeURIComponent(waUrl));
+
+      checkStatus(currentRef);
     });
+
+    function checkStatus(ref) {
+      const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+      const order = orders.find(o => o.id === ref);
+      const badgeEl = document.getElementById('orderStatusBadge');
+      const cancelBtn = document.getElementById('cancelOrderBtn');
+
+      if (order && (order.status === 'Cancelled by Customer' || order.status === 'Cancelled / Failed')) {
+        badgeEl.innerHTML = `<span class="badge" style="background:#e63946; color:#fff; font-size:0.8rem;">Status: Cancelled by Customer</span>`;
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        document.getElementById('successHeading').textContent = 'Order Cancelled';
+        document.getElementById('successIcon').style.background = 'rgba(230,57,70,0.1)';
+        document.getElementById('successIcon').style.borderColor = '#e63946';
+        document.getElementById('successIcon').innerHTML = `<i class="fa-solid fa-xmark" style="color:#e63946;"></i>`;
+      }
+    }
+
+    function cancelCustomerOrder() {
+      if (!currentRef) return;
+
+      if (confirm(`Are you sure you want to cancel order ${currentRef}?`)) {
+        let orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+        const idx = orders.findIndex(o => o.id === currentRef);
+        if (idx !== -1) {
+          orders[idx].status = 'Cancelled by Customer';
+          localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+        } else {
+          // If not in local history, create a cancelled record
+          orders.unshift({ id: currentRef, date: 'Today', status: 'Cancelled by Customer', total: 0 });
+          localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+        }
+
+        checkStatus(currentRef);
+        App.showToast(`Order ${currentRef} has been cancelled`);
+      }
+    }
   </script>
 </body>
 </html>

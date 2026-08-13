@@ -12,7 +12,10 @@ class AdminManager {
   static renderMetrics() {
     const products = ProductsAPI.getProducts();
     const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
-    const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+    // Only count revenue for non-cancelled orders
+    const activeOrders = orders.filter(o => o.status !== 'Cancelled by Customer' && o.status !== 'Cancelled / Failed');
+    const totalRevenue = activeOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
     const revenueEl  = document.getElementById("metricRevenue");
     const productsEl = document.getElementById("metricProducts");
@@ -29,7 +32,7 @@ class AdminManager {
 
     const products = ProductsAPI.getProducts();
     if (products.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-tbl">No products in catalog. Click "Upload New Product" to add.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-tbl">No products in catalog. Click "Upload New Product" to add.</td></tr>`;
       return;
     }
 
@@ -68,13 +71,20 @@ class AdminManager {
     `}).join('');
   }
 
-  static renderOrdersTable() {
+  static renderOrdersTable(filterStatus = 'ALL') {
     const container = document.getElementById("ordersContainer");
     if (!container) return;
 
-    const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+    const allOrders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
 
-    if (orders.length === 0) {
+    let orders = allOrders;
+    if (filterStatus === 'CANCELLED') {
+      orders = allOrders.filter(o => o.status === 'Cancelled by Customer' || o.status === 'Cancelled / Failed');
+    } else if (filterStatus === 'ACTIVE') {
+      orders = allOrders.filter(o => o.status !== 'Cancelled by Customer' && o.status !== 'Cancelled / Failed');
+    }
+
+    if (allOrders.length === 0) {
       container.innerHTML = `
         <div class="empty-tbl">
           <i class="fa-regular fa-file-lines" style="font-size:2.2rem; display:block; margin-bottom:10px; color:var(--gold);"></i>
@@ -83,8 +93,25 @@ class AdminManager {
       return;
     }
 
-    container.innerHTML = `
-      <div style="overflow-x:auto;">
+    const filterToolbar = `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 18px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; gap:8px; font-size:0.78rem;">
+          <button class="btn btn-sm ${filterStatus === 'ALL' ? 'btn-gold' : 'btn-outline'}" onclick="AdminManager.renderOrdersTable('ALL')">All (${allOrders.length})</button>
+          <button class="btn btn-sm ${filterStatus === 'ACTIVE' ? 'btn-gold' : 'btn-outline'}" onclick="AdminManager.renderOrdersTable('ACTIVE')">Active (${allOrders.filter(o => o.status !== 'Cancelled by Customer' && o.status !== 'Cancelled / Failed').length})</button>
+          <button class="btn btn-sm ${filterStatus === 'CANCELLED' ? 'btn-gold' : 'btn-outline'}" style="${filterStatus === 'CANCELLED' ? 'background:#e63946; color:#fff;' : 'border-color:rgba(230,57,70,0.4); color:#e63946;'}" onclick="AdminManager.renderOrdersTable('CANCELLED')">Cancelled (${allOrders.filter(o => o.status === 'Cancelled by Customer' || o.status === 'Cancelled / Failed').length})</button>
+        </div>
+      </div>`;
+
+    if (orders.length === 0) {
+      container.innerHTML = filterToolbar + `
+        <div class="empty-tbl">
+          No orders match the selected filter.
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = filterToolbar + `
+      <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
         <table class="admin-tbl">
           <thead>
             <tr>
@@ -96,36 +123,45 @@ class AdminManager {
               <th>Items Ordered</th>
               <th>Total Paid</th>
               <th>Status</th>
-              <th>Action</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            ${orders.map((o, idx) => {
+            ${orders.map((o) => {
               const cust = o.customer || {};
               const itemsStr = (o.items || []).map(i => `${i.name} (${i.size}) x${i.qty}`).join(', ');
               const status = o.status || 'Payment Confirmed';
+              const isCancelled = status === 'Cancelled by Customer' || status === 'Cancelled / Failed';
               const cleanPhone = cust.phone ? cust.phone.replace(/[^0-9]/g, '') : '';
-              const waLink = cleanPhone ? `https://wa.me/234${cleanPhone.slice(-10)}?text=Hello%20${encodeURIComponent(cust.name || 'Valued Customer')},%20this%20is%20Angela%20from%20Unified%20Vogue%20regarding%20order%20${o.id}.` : '#';
+              const waLink = cleanPhone ? `https://wa.me/234${cleanPhone.slice(-10)}?text=Hello%20${encodeURIComponent(cust.name || 'Valued Customer')},%20this%20is%20Unified%20Vogue%20regarding%20order%20${o.id}.` : '#';
+
+              let badgeStyle = 'background:var(--gold-grad); color:#000;';
+              if (status === 'Dispatched') badgeStyle = 'background:#25D366; color:#fff;';
+              else if (isCancelled) badgeStyle = 'background:#e63946; color:#fff;';
+              else if (status === 'Payment Pending Confirmation') badgeStyle = 'background:#f39c12; color:#fff;';
 
               return `
-                <tr>
-                  <td><strong style="color:var(--gold-light); font-family:monospace;">${o.id}</strong></td>
+                <tr style="${isCancelled ? 'opacity:0.72;' : ''}">
+                  <td><strong style="color:${isCancelled ? '#e63946' : 'var(--gold-light)'}; font-family:monospace;">${o.id}</strong></td>
                   <td style="font-size:0.78rem; color:var(--grey-dim);">${o.date || 'Today'}</td>
                   <td><strong>${cust.name || 'Customer'}</strong></td>
                   <td style="font-size:0.82rem;">${cust.phone || '—'}</td>
                   <td style="font-size:0.8rem; color:var(--grey); max-width:180px;">${cust.address || '—'}, ${cust.city || ''}</td>
                   <td style="font-size:0.8rem; max-width:200px; color:var(--grey-light);">${itemsStr || '—'}</td>
-                  <td class="admin-price">${App.formatMoney(o.total || 0)}</td>
+                  <td class="admin-price" style="${isCancelled ? 'text-decoration:line-through; color:var(--grey-dim);' : ''}">${App.formatMoney(o.total || 0)}</td>
                   <td>
-                    <span class="badge" style="background:${status === 'Dispatched' ? '#25D366' : 'var(--gold-grad)'}; color:#000; font-size:0.6rem;">
+                    <span class="badge" style="${badgeStyle} font-size:0.6rem; text-transform:uppercase;">
                       ${status}
                     </span>
                   </td>
                   <td>
-                    <div style="display:flex; gap:6px;">
-                      ${cleanPhone ? `<a href="${waLink}" target="_blank" class="btn btn-gold btn-sm" style="padding:4px 10px; font-size:0.72rem; background:#25D366; color:#fff;" title="Chat customer on WhatsApp"><i class="fa-brands fa-whatsapp"></i> Chat</a>` : ''}
-                      <button class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:0.72rem;" onclick="AdminManager.toggleOrderStatus(${idx})" title="Toggle Order Status">
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                      ${cleanPhone && !isCancelled ? `<a href="${waLink}" target="_blank" class="btn btn-gold btn-sm" style="padding:4px 10px; font-size:0.72rem; background:#25D366; color:#fff;" title="Chat customer on WhatsApp"><i class="fa-brands fa-whatsapp"></i> Chat</a>` : ''}
+                      <button class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:0.72rem;" onclick="AdminManager.toggleOrderStatus('${o.id}')" title="Change Order Status">
                         <i class="fa-solid fa-rotate"></i>
+                      </button>
+                      <button class="del-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="AdminManager.deleteOrder('${o.id}')" title="Delete Unsuccessful Order">
+                        <i class="fa-solid fa-trash-can"></i>
                       </button>
                     </div>
                   </td>
@@ -169,13 +205,29 @@ class AdminManager {
     }
   }
 
-  static toggleOrderStatus(index) {
+  static toggleOrderStatus(refId) {
     const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
-    if (orders[index]) {
-      orders[index].status = orders[index].status === 'Dispatched' ? 'Payment Confirmed' : 'Dispatched';
+    const idx = orders.findIndex(o => o.id === refId);
+    if (idx !== -1) {
+      const statuses = ['Payment Pending Confirmation', 'Payment Confirmed', 'Dispatched', 'Cancelled by Customer'];
+      const currentIdx = statuses.indexOf(orders[idx].status);
+      const nextIdx = (currentIdx + 1) % statuses.length;
+      orders[idx].status = statuses[nextIdx];
+
       localStorage.setItem("uv_orders_history", JSON.stringify(orders));
-      App.showToast(`Order status updated to "${orders[index].status}"`);
+      App.showToast(`Order ${refId} status set to "${orders[idx].status}"`);
       this.initAdminDashboard();
     }
+  }
+
+  static deleteOrder(refId) {
+    if (!confirm(`Delete order "${refId}" from store records?\nThis will remove it from the sales log.`)) return;
+
+    let orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+    orders = orders.filter(o => o.id !== refId);
+    localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+
+    App.showToast(`Order ${refId} deleted from records`);
+    this.initAdminDashboard();
   }
 }

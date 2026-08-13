@@ -60,7 +60,12 @@
       <div class="cart-panel">
         <div class="cart-panel-head">
           <h2>Selected Items <span id="cartCountLabel" style="color:var(--grey-dim);"></span></h2>
-          <a href="shop.html">← Continue Shopping</a>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <button class="btn btn-outline btn-sm" onclick="clearFullBag()" id="clearBagBtn" style="display:none; font-size:0.75rem; border-color:rgba(230,57,70,0.4); color:#e63946;">
+              <i class="fa-solid fa-trash-can"></i> Clear Bag
+            </button>
+            <a href="shop.html" style="font-size:0.85rem; color:var(--gold);">← Continue Shopping</a>
+          </div>
         </div>
 
         <div id="cartBody">
@@ -71,15 +76,19 @@
 
     <div>
       <div class="summary">
-        <div class="summary-title">Summary</div>
+        <div class="summary-title">Order Summary</div>
 
         <div class="summary-row">
-          <span>Subtotal</span>
+          <span>Items Count</span>
+          <span id="itemsQtyVal">0 items</span>
+        </div>
+        <div class="summary-row">
+          <span>Items Subtotal</span>
           <span id="subTotalVal">₦0</span>
         </div>
         <div class="summary-row">
           <span>Delivery Fee</span>
-          <span id="deliveryVal" style="color:var(--gold); font-size:0.82rem;">Confirmed by seller</span>
+          <span id="deliveryVal" style="color:var(--gold); font-size:0.82rem;">Confirmed on WhatsApp</span>
         </div>
 
         <div class="summary-div"></div>
@@ -90,7 +99,7 @@
         </div>
         <div style="font-size:0.76rem; color:var(--grey-dim); margin-top:8px; line-height:1.5;">
           <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i>
-          Delivery fee confirmed on WhatsApp before dispatch.
+          Delivery fee confirmed by seller on WhatsApp before dispatch.
         </div>
 
         <a href="checkout.html" class="btn btn-gold btn-full" id="checkoutBtn" style="margin-top:20px;">
@@ -118,16 +127,17 @@
   <script src="js/cart.js"></script>
 
   <script>
-    const DELIVERY_FEE = 0;
-
     function renderCart() {
       const cart = CartManager.getCart();
       const body = document.getElementById('cartBody');
       const countLabel = document.getElementById('cartCountLabel');
       const checkoutBtn = document.getElementById('checkoutBtn');
+      const clearBtn = document.getElementById('clearBagBtn');
 
-      const totalItems = cart.reduce((s, i) => s + i.qty, 0);
-      countLabel.textContent = totalItems > 0 ? `(${totalItems})` : '';
+      const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+      const uniqueItems = cart.length;
+
+      countLabel.textContent = totalQty > 0 ? `(${totalQty} item${totalQty > 1 ? 's' : ''})` : '';
 
       if (cart.length === 0) {
         body.innerHTML = `
@@ -137,30 +147,32 @@
             <p>Add some stylish shirts to your bag to get started.</p>
             <a href="shop.html" class="btn btn-gold">Explore Collection</a>
           </div>`;
+        document.getElementById('itemsQtyVal').textContent = '0 items';
         document.getElementById('subTotalVal').textContent = App.formatMoney(0);
-        document.getElementById('deliveryVal').textContent = App.formatMoney(0);
         document.getElementById('grandTotalVal').textContent = App.formatMoney(0);
         checkoutBtn.style.opacity = '0.5';
         checkoutBtn.style.pointerEvents = 'none';
+        if (clearBtn) clearBtn.style.display = 'none';
         return;
       }
 
       checkoutBtn.style.opacity = '1';
       checkoutBtn.style.pointerEvents = 'auto';
+      if (clearBtn) clearBtn.style.display = 'inline-flex';
 
       let subtotal = 0;
 
       const rows = cart.map(item => {
-        const itemTot = item.price * item.qty;
+        const itemTot = Number(item.price) * Number(item.qty);
         subtotal += itemTot;
         return `
           <tr>
             <td>
               <div class="cart-item-cell">
-                <img class="cart-item-img" src="${item.image}" alt="${item.name}" />
+                <img class="cart-item-img" src="${item.image}" alt="${item.name}" onerror="this.src='images/logo.jpg'" />
                 <div>
                   <div class="cart-item-name">${item.name}</div>
-                  <div class="cart-item-meta">Size: ${item.size}</div>
+                  <div class="cart-item-meta">Size: <strong style="color:var(--gold);">${item.size}</strong></div>
                 </div>
               </div>
             </td>
@@ -174,7 +186,7 @@
             </td>
             <td class="cart-total">${App.formatMoney(itemTot)}</td>
             <td>
-              <button class="rm-btn" title="Remove" onclick="removeItem('${item.id}','${item.size}')">
+              <button class="rm-btn" title="Remove Item" onclick="removeItem('${item.id}','${item.size}')">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </td>
@@ -183,21 +195,23 @@
       }).join('');
 
       body.innerHTML = `
-        <table class="cart-tbl">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Price</th>
-              <th>Qty</th>
-              <th>Total</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
+        <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+          <table class="cart-tbl">
+            <thead>
+              <tr>
+                <th>Item Details</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
       `;
 
-      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+      document.getElementById('itemsQtyVal').textContent = `${totalQty} item${totalQty > 1 ? 's' : ''} (${uniqueItems} product${uniqueItems > 1 ? 's' : ''})`;
       document.getElementById('subTotalVal').textContent = App.formatMoney(subtotal);
       document.getElementById('grandTotalVal').textContent = App.formatMoney(subtotal);
     }
@@ -210,6 +224,14 @@
     function removeItem(id, size) {
       CartManager.removeFromCart(id, size);
       renderCart();
+    }
+
+    function clearFullBag() {
+      if (confirm("Remove all items from your shopping bag?")) {
+        CartManager.saveCart([]);
+        renderCart();
+        App.showToast("Shopping bag cleared");
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
