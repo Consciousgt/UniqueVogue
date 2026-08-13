@@ -28,11 +28,15 @@
           <span class="nav-brand-tag">Your Outfits Speaks Fashion</span>
         </div>
       </a>
-      <ul class="nav-links">
+      <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="cart.html">← Back to Bag</a></li>
+        <span class="nav-close" id="navClose"><i class="fa-solid fa-xmark"></i></span>
       </ul>
+      <div class="nav-actions">
+        <button class="nav-toggle" id="navToggle" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>
+      </div>
     </div>
   </nav>
 
@@ -195,6 +199,14 @@
 
       document.getElementById('coSubtotal').textContent = App.formatMoney(subtotal);
       document.getElementById('coTotal').textContent = App.formatMoney(subtotal);
+
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      const close = document.getElementById('navClose');
+      if (toggle && links) {
+        toggle.addEventListener('click', () => links.classList.add('open'));
+        if (close) close.addEventListener('click', () => links.classList.remove('open'));
+      }
     });
 
     function handleCheckoutSubmit(e) {

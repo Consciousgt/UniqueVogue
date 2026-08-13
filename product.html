@@ -51,21 +51,8 @@
     }
     .sc-tip strong { color: var(--gold-light); }
 
-    /* Measurement diagram labels */
-    .sc-diagram {
-      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px;
-    }
-    .sc-label {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 0.76rem; color: var(--grey);
-    }
-    .sc-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: var(--gold); flex-shrink: 0;
-    }
-
     /* Size chart table */
-    .sc-table-wrap { overflow-x: auto; }
+    .sc-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .sc-table {
       width: 100%; border-collapse: collapse; font-size: 0.85rem;
     }
@@ -76,26 +63,32 @@
       border-bottom: 1px solid var(--border-gold);
     }
     .sc-table thead th:first-child { text-align: left; }
-    .sc-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; }
+    .sc-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
     .sc-table tbody tr:last-child { border-bottom: none; }
-    .sc-table tbody tr:hover { background: rgba(197,160,89,0.04); }
+    .sc-table tbody tr:hover { background: rgba(197,160,89,0.08); }
     .sc-table td {
-      padding: 11px 14px; text-align: center; color: var(--grey);
+      padding: 12px 14px; text-align: center; color: var(--grey);
     }
     .sc-table td:first-child {
       text-align: left; font-weight: 800; color: var(--gold-light);
       letter-spacing: 1px; font-size: 0.88rem;
     }
-    .sc-table td.selected-row { background: rgba(197,160,89,0.09); }
-    .sc-table td:first-child.selected-row { color: var(--gold); }
+    .sc-table tr.selected-row td { background: rgba(197,160,89,0.12); color: #fff; }
+    .sc-table tr.selected-row td:first-child { color: var(--gold); }
     .sc-unit { font-size: 0.72rem; color: var(--grey-dim); text-align: right; margin-top: 12px; }
 
-    /* No chart placeholder */
-    .no-chart {
-      text-align: center; padding: 30px 16px;
-      color: var(--grey-dim); font-size: 0.88rem;
+    /* Size selector pill button highlight */
+    .size-btn.on {
+      border-color: var(--gold) !important;
+      color: #000 !important;
+      background: var(--gold-grad) !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 14px rgba(197,160,89,0.3);
     }
-    .no-chart i { font-size: 2rem; display: block; margin-bottom: 10px; color: var(--border-gold); }
   </style>
 </head>
 <body>
@@ -134,8 +127,8 @@
     <div class="sc-modal" id="sizeChartModal">
       <div class="sc-header">
         <div>
-          <h3><i class="fa-solid fa-ruler" style="color:var(--gold);margin-right:6px;font-size:0.9rem;"></i> Size Chart</h3>
-          <p id="scProductName">All measurements are in centimetres (cm)</p>
+          <h3><i class="fa-solid fa-ruler" style="color:var(--gold);margin-right:6px;font-size:0.9rem;"></i> Size Chart &amp; Measurements</h3>
+          <p id="scProductName">Click any row below to choose your size</p>
         </div>
         <button class="sc-close" onclick="document.getElementById('sizeChartOverlay').classList.remove('open')">
           <i class="fa-solid fa-xmark"></i>
@@ -181,6 +174,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const prodId    = urlParams.get('id') || 'uv-1';
+      const initialSize = urlParams.get('size');
       const p         = ProductsAPI.getProductById(prodId);
       currentProduct  = p;
       const container = document.getElementById('detailContainer');
@@ -198,7 +192,9 @@
 
       document.getElementById('breadcrumbTitle').textContent = p.name;
       document.title = `${p.name} — Unified Vogue`;
-      selectedSize = p.sizes ? p.sizes[0] : 'S';
+
+      const availableSizes = p.sizes && p.sizes.length > 0 ? p.sizes : ['S','M','L','XL','2XL'];
+      selectedSize = (initialSize && availableSizes.includes(initialSize)) ? initialSize : availableSizes[0];
 
       const hasSizeChart = p.sizeChart && p.sizeChart.measurements && p.sizeChart.measurements.length > 0;
 
@@ -227,32 +223,34 @@
           <p class="detail-desc">${p.description}</p>
 
           <!-- Size Selector -->
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-            <span class="size-label" style="margin-bottom:0;">Select Size</span>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+            <span class="size-label" style="margin-bottom:0;">
+              Selected Size: <strong id="selectedSizeLabel" style="color:var(--gold-light); font-size:0.9rem;">${selectedSize}</strong>
+            </span>
             ${hasSizeChart ? `
-              <button onclick="openSizeChart()" style="background:none; border:none; color:var(--gold); font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; font-family:var(--font-s); transition:var(--ease);">
-                <i class="fa-solid fa-ruler"></i> Size Chart & Measurements
+              <button type="button" onclick="openSizeChart()" style="background:none; border:none; color:var(--gold); font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; font-family:var(--font-s); transition:var(--ease);">
+                <i class="fa-solid fa-ruler"></i> Size Chart &amp; Measurements
               </button>
             ` : ''}
           </div>
 
           <div class="size-btns" id="sizeBtns">
-            ${(p.sizes || ['S','M','L','XL','XXL']).map((s, i) => `
-              <button class="size-btn ${i === 0 ? 'on' : ''}" onclick="setSize(this, '${s}')">${s}</button>
+            ${availableSizes.map(s => `
+              <button type="button" class="size-btn ${s === selectedSize ? 'on' : ''}" data-size="${s}" onclick="setSize('${s}')">${s}</button>
             `).join('')}
           </div>
 
           <div class="qty-row">
             <span class="qty-label">Quantity:</span>
             <div class="qty-ctrl">
-              <button class="qty-btn" onclick="changeQty(-1)">−</button>
+              <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
               <span class="qty-num" id="qtyNum">1</span>
-              <button class="qty-btn" onclick="changeQty(1)">+</button>
+              <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
             </div>
           </div>
 
           <div class="detail-cta">
-            <button class="btn btn-gold" onclick="addToBag()">
+            <button type="button" class="btn btn-gold" onclick="addToBag()">
               <i class="fa-solid fa-bag-shopping"></i> Add to Bag
             </button>
             <a href="cart.html" class="btn btn-outline">
@@ -292,12 +290,32 @@
     });
 
     /* ── Size Picker ── */
-    function setSize(btn, size) {
+    function setSize(size) {
       selectedSize = size;
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      // Highlight that row in size chart if open
+      const sizeLabel = document.getElementById('selectedSizeLabel');
+      if (sizeLabel) sizeLabel.textContent = size;
+
+      document.querySelectorAll('.size-btn').forEach(b => {
+        if (b.getAttribute('data-size') === size) {
+          b.classList.add('on');
+        } else {
+          b.classList.remove('on');
+        }
+      });
+
+      // Highlight that row in size chart modal
       highlightChartRow(size);
+    }
+
+    /* ── Select from Size Chart Table Row ── */
+    function selectSizeFromChart(size) {
+      setSize(size);
+      App.showToast(`Selected Size: ${size}`);
+      // Close modal after brief feedback
+      setTimeout(() => {
+        const overlay = document.getElementById('sizeChartOverlay');
+        if (overlay) overlay.classList.remove('open');
+      }, 350);
     }
 
     /* ── Qty ── */
@@ -317,7 +335,7 @@
     function openSizeChart() {
       const p = currentProduct;
       if (!p) return;
-      document.getElementById('scProductName').textContent = p.name;
+      document.getElementById('scProductName').textContent = `${p.name} (Click a size row to select)`;
       renderSizeChart(p);
       document.getElementById('sizeChartOverlay').classList.add('open');
     }
@@ -342,11 +360,11 @@
         return;
       }
 
-      const unit = sc.unit || 'cm';
+      const unit = sc.unit || 'inches';
 
-      // Determine which columns exist across all rows (order: length, shoulder, sleeve, chest)
+      // Determine which columns exist across all rows
       const colOrder = ['length','shoulder','sleeve','chest','waist','hip'];
-      const cols = colOrder.filter(k => sampleRow[k] !== undefined && sampleRow[k] !== '');
+      const cols = colOrder.filter(k => sc.measurements.some(row => row[k] !== undefined && row[k] !== ''));
 
       const colLabels = {
         length:   '↕️ Length',
@@ -372,17 +390,23 @@
               <tr>
                 <th>Size</th>
                 ${cols.map(c => `<th>${colLabels[c]}</th>`).join('')}
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               ${sc.measurements.map(row => {
-                const isSelected = row.size === selectedSize;
+                const isSelected = row.size === selectedSize || (row.size === '2XL' && selectedSize === 'XXL') || (row.size === 'XXL' && selectedSize === '2XL');
                 return `
-                  <tr ${isSelected ? 'id="sc-row-' + row.size + '"' : 'id="sc-row-' + row.size + '"'}>
-                    <td class="${isSelected ? 'selected-row' : ''}" style="font-weight:800; color:${isSelected ? 'var(--gold)' : 'var(--gold-light)'};">
-                      ${row.size} ${isSelected ? '<i class="fa-solid fa-check" style="color:var(--gold); font-size:0.7rem; margin-left:4px;"></i>' : ''}
+                  <tr class="${isSelected ? 'selected-row' : ''}" onclick="selectSizeFromChart('${row.size}')" id="sc-row-${row.size}">
+                    <td style="font-weight:800; color:${isSelected ? 'var(--gold)' : 'var(--gold-light)'};">
+                      ${row.size}
                     </td>
-                    ${cols.map(c => `<td class="${isSelected ? 'selected-row' : ''}">${row[c] || '—'}</td>`).join('')}
+                    ${cols.map(c => `<td>${row[c] || '—'}</td>`).join('')}
+                    <td>
+                      <span class="badge" style="background:${isSelected ? 'var(--gold-grad)' : 'rgba(255,255,255,0.06)'}; color:${isSelected ? '#000' : 'var(--grey)'}; font-size:0.68rem; padding:3px 8px;">
+                        ${isSelected ? '<i class="fa-solid fa-check"></i> Selected' : 'Choose'}
+                      </span>
+                    </td>
                   </tr>
                 `;
               }).join('')}
@@ -390,12 +414,12 @@
           </table>
         </div>
 
-        <p class="sc-unit">All measurements in ${unit}. Sizes may vary slightly due to fabric and construction.</p>
+        <p class="sc-unit">All measurements in ${unit}. Click any row above to choose your size.</p>
 
         <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
-          <a href="https://wa.me/2349126284759?text=Hello%20Angela%2C%20I%20need%20help%20with%20sizing%20for%20${encodeURIComponent(p.name)}" target="_blank"
+          <a href="https://wa.me/2349126284759?text=Hello%20Unified%20Vogue%2C%20I%20need%20help%20with%20sizing%20for%20${encodeURIComponent(p.name)}" target="_blank"
             style="display:inline-flex; align-items:center; gap:7px; background:#25D366; color:#fff; padding:9px 18px; border-radius:var(--r-full); font-size:0.82rem; font-weight:700; text-decoration:none; transition:var(--ease);">
-            <i class="fa-brands fa-whatsapp"></i> Ask Angela for Help with Sizing
+            <i class="fa-brands fa-whatsapp"></i> Ask for Help with Sizing
           </a>
         </div>
       `;
@@ -403,13 +427,19 @@
 
     function highlightChartRow(size) {
       document.querySelectorAll('.sc-table tbody tr').forEach(tr => {
-        const firstTd = tr.querySelector('td:first-child');
-        const isThis  = tr.id === `sc-row-${size}`;
-        tr.querySelectorAll('td').forEach(td => {
-          td.classList.toggle('selected-row', isThis);
-        });
-        if (firstTd) {
-          firstTd.style.color = isThis ? 'var(--gold)' : 'var(--gold-light)';
+        const isThis = tr.id === `sc-row-${size}` || (size === 'XXL' && tr.id === 'sc-row-2XL') || (size === '2XL' && tr.id === 'sc-row-XXL');
+        tr.classList.toggle('selected-row', isThis);
+        const badge = tr.querySelector('.badge');
+        if (badge) {
+          if (isThis) {
+            badge.style.background = 'var(--gold-grad)';
+            badge.style.color = '#000';
+            badge.innerHTML = '<i class="fa-solid fa-check"></i> Selected';
+          } else {
+            badge.style.background = 'rgba(255,255,255,0.06)';
+            badge.style.color = 'var(--grey)';
+            badge.textContent = 'Choose';
+          }
         }
       });
     }

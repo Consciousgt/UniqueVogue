@@ -13,12 +13,13 @@ class CartManager {
     this.updateBadges();
   }
 
-  static addToCart(productId, qty = 1, selectedSize = "S") {
+  static addToCart(productId, qty = 1, selectedSize = null) {
     const product = ProductsAPI.getProductById(productId);
     if (!product) return;
 
+    const size = selectedSize || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : "S");
     let cart = this.getCart();
-    const existingIndex = cart.findIndex(item => item.id === productId && item.size === selectedSize);
+    const existingIndex = cart.findIndex(item => item.id === productId && item.size === size);
 
     if (existingIndex > -1) {
       cart[existingIndex].qty += qty;
@@ -30,12 +31,12 @@ class CartManager {
         price: product.price,
         image: product.image,
         qty: qty,
-        size: selectedSize || "S"
+        size: size
       });
     }
 
     this.saveCart(cart);
-    App.showToast(`Added "${product.name}" (${selectedSize}) to bag!`);
+    App.showToast(`Added "${product.name}" (${size}) to bag!`);
   }
 
   static updateQuantity(productId, size, delta) {
