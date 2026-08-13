@@ -61,8 +61,8 @@ class CheckoutManager {
     // Clear shopping bag after order submission
     CartManager.saveCart([]);
 
-    // Direct WhatsApp receipt link to Angela's phone number (+2347044027511)
-    const waUrl = `https://wa.me/2347044027511?text=${encodeURIComponent(whatsappMessage)}`;
+    // Direct WhatsApp receipt link to phone number (+2349126284759)
+    const waUrl = `https://wa.me/2349126284759?text=${encodeURIComponent(whatsappMessage)}`;
     window.location.href = `success.html?ref=${refCode}&wa=${encodeURIComponent(waUrl)}`;
   }
 }
