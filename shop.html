@@ -3,15 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shop Collection — Unified Vogue</title>
+  <title>Shop Luxury Shirts — Unified Vogue</title>
   <meta name="description" content="Browse our luxury collection of Vintage Shirts and Knit Shirts at Unified Vogue."/>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
   <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    .cat-filter-pills {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
+    }
+    .cat-pill {
+      background: var(--black-card); border: 1px solid var(--border);
+      color: var(--grey); padding: 7px 16px; border-radius: var(--r-full);
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: var(--ease);
+      font-family: var(--font-s);
+    }
+    .cat-pill:hover { border-color: var(--gold); color: var(--gold); }
+    .cat-pill.active {
+      background: var(--gold-grad); color: #000; border-color: var(--gold);
+      box-shadow: 0 4px 12px rgba(197,160,89,0.25);
+    }
+  </style>
 </head>
 <body>
 
@@ -41,7 +57,7 @@
           <i class="fa-solid fa-bag-shopping"></i>
           <span class="nav-badge" id="navCartBadge">0</span>
         </a>
-        <button class="nav-toggle" id="navToggle"><i class="fa-solid fa-bars"></i></button>
+        <button class="nav-toggle" id="navToggle" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>
       </div>
     </div>
   </nav>
@@ -60,7 +76,7 @@
     <div class="shop-bar">
       <div class="search-wrap">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="shopSearchInput" placeholder="Search catalog..." autocomplete="off" />
+        <input type="text" id="shopSearchInput" placeholder="Search catalog by name or style..." autocomplete="off" />
       </div>
       <div class="bar-right">
         <span class="results-label" id="resultsCount">Loading...</span>
@@ -72,7 +88,14 @@
       </div>
     </div>
 
-    <div class="prod-grid" id="shopProductsGrid">
+    <!-- Category Filter Pills -->
+    <div class="cat-filter-pills">
+      <button class="cat-pill active" onclick="setCategoryFilter('ALL', this)">All Shirts</button>
+      <button class="cat-pill" onclick="setCategoryFilter('Knit', this)">Knit Shirts</button>
+      <button class="cat-pill" onclick="setCategoryFilter('Vintage', this)">Vintage Shirts</button>
+    </div>
+
+    <div class="prod-grid" id="shopProductsGrid" style="margin-top:24px;">
       <!-- JS injected -->
     </div>
   </div>
@@ -92,10 +115,26 @@
   <script src="js/cart.js"></script>
 
   <script>
+    let activeCategory = 'ALL';
+
+    function setCategoryFilter(cat, btn) {
+      activeCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderProducts();
+    }
+
     function renderProducts() {
       const query = document.getElementById('shopSearchInput').value.toLowerCase().trim();
       const sortVal = document.getElementById('sortSelect').value;
       let products = ProductsAPI.getProducts();
+
+      if (activeCategory !== 'ALL') {
+        products = products.filter(p =>
+          (p.category && p.category.toLowerCase().includes(activeCategory.toLowerCase())) ||
+          (p.name && p.name.toLowerCase().includes(activeCategory.toLowerCase()))
+        );
+      }
 
       if (query) {
         products = products.filter(p =>
@@ -114,7 +153,7 @@
 
       if (products.length === 0) {
         grid.innerHTML = `
-          <div class="empty">
+          <div class="empty" style="grid-column:1/-1;">
             <i class="fa-regular fa-face-sad-tear"></i>
             <h3 class="serif">No products found</h3>
             <p>Try searching for "knit" or "vintage"</p>
@@ -126,7 +165,7 @@
         <div class="prod-card">
           <div class="prod-thumb">
             <span class="badge">${p.badge || 'Available'}</span>
-            <img src="${p.image}" alt="${p.name}" loading="lazy" />
+            <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='images/logo.jpg'" />
           </div>
           <div class="prod-body">
             <span class="prod-cat">${p.category}</span>

@@ -45,6 +45,62 @@
     .sc-prev-tbl thead th { background: var(--black); color: var(--gold); padding: 10px; font-size: 0.72rem; text-transform: uppercase; border-bottom: 1px solid var(--border-gold); }
     .sc-prev-tbl td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--grey); }
     .sc-prev-tbl td:first-child { font-weight: 700; color: var(--gold-light); text-align: left; }
+
+    /* ── Animated Success Tick Popup (3 Seconds) ── */
+    .success-tick-overlay {
+      display: none; position: fixed; inset: 0; z-index: 6000;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .success-tick-overlay.open { display: flex; animation: fadeIn 0.25s ease forwards; }
+    .success-tick-modal {
+      background: var(--black-card); border: 1px solid var(--border-gold);
+      border-radius: var(--r-lg); max-width: 420px; width: 100%;
+      padding: 32px 26px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--shadow-gold);
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      position: relative; overflow: hidden;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .success-tick-icon-wrap {
+      width: 76px; height: 76px; margin: 0 auto 18px;
+    }
+    .checkmark {
+      width: 76px; height: 76px; border-radius: 50%; display: block;
+      stroke-width: 3; stroke: var(--gold); stroke-miterlimit: 10;
+      box-shadow: inset 0px 0px 0px var(--gold);
+      animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+    }
+    .checkmark__circle {
+      stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 3;
+      stroke-miterlimit: 10; stroke: var(--gold); fill: rgba(197,160,89,0.1);
+      animation: stroke .6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    .checkmark__check {
+      transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48;
+      animation: stroke .3s cubic-bezier(0.65, 0, 0.45, 1) .6s forwards;
+      stroke: #fff;
+    }
+    @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+    @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+    @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 40px rgba(197,160,89,0.15); } }
+
+    .success-tick-timer-bar {
+      width: 100%; height: 4px; background: rgba(255,255,255,0.08);
+      border-radius: 2px; overflow: hidden; margin-top: 18px;
+    }
+    .success-tick-timer-fill {
+      height: 100%; background: var(--gold-grad); width: 100%;
+      animation: timerCountdown 3s linear forwards;
+    }
+    @keyframes timerCountdown {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
   </style>
 </head>
 <body>
@@ -94,6 +150,25 @@
         <button class="btn btn-gold" onclick="document.getElementById('scPreviewOverlay').classList.remove('open')">
           Close Preview
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-Second Success Tick Modal -->
+  <div class="success-tick-overlay" id="successTickOverlay" onclick="closeSuccessTick()">
+    <div class="success-tick-modal" onclick="event.stopPropagation()">
+      <div class="success-tick-icon-wrap">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      <h2 class="serif" style="color:var(--gold-light); font-size:1.4rem; margin-bottom:8px;">Published Successfully!</h2>
+      <p id="successTickMsg" style="color:var(--grey); font-size:0.86rem; line-height:1.6; margin-bottom:12px;">
+        Your new shirt is now live in the store catalog with the permanent standard size chart.
+      </p>
+      <div class="success-tick-timer-bar">
+        <div class="success-tick-timer-fill" id="successTickTimerFill"></div>
       </div>
     </div>
   </div>
@@ -300,6 +375,7 @@
 
   <script>
     let adminBase64Image = "";
+    let successTickTimeout = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       if (sessionStorage.getItem("uv_owner_unlocked") === "true") {
@@ -347,7 +423,7 @@
       reader.readAsDataURL(file);
     }
 
-    /* ── Upload New Product ── */
+    /* ── Upload New Product With 3-Second Success Tick Popup ── */
     function handleAdminUpload(e) {
       e.preventDefault();
       const title    = document.getElementById("pTitle").value.trim();
@@ -361,6 +437,7 @@
       const sizes    = sizesRaw ? sizesRaw.split(",").map(s => s.trim()).filter(Boolean) : ["S","M","L","XL","2XL"];
       const imageSrc = adminBase64Image || urlInput || "images/shirt-black-knit.jpg";
 
+      // 1. Add product to permanent database
       ProductsAPI.addProduct({
         name: title,
         category,
@@ -372,14 +449,50 @@
         description: desc
       });
 
+      // 2. Refresh Form Completely
       document.getElementById("adminUploadForm").reset();
-      document.getElementById("adminPreviewThumb").style.display = "none";
+      const thumb = document.getElementById("adminPreviewThumb");
+      thumb.src = "";
+      thumb.style.display = "none";
       document.getElementById("pSizes").value = "S, M, L, XL, 2XL";
       adminBase64Image = "";
 
-      App.showToast(`Published "${title}" to catalog with permanent size chart!`);
+      // 3. Trigger 3-Second Animated Success Tick Modal
+      showSuccessTick(`"${title}" has been published and is now live with the permanent size chart!`);
+
+      // 4. Re-render Dashboard
       AdminManager.initAdminDashboard();
       document.getElementById("catalogSection").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function showSuccessTick(message) {
+      const overlay = document.getElementById("successTickOverlay");
+      const msgEl   = document.getElementById("successTickMsg");
+      const fillEl  = document.getElementById("successTickTimerFill");
+
+      if (msgEl) msgEl.textContent = message;
+
+      // Reset animation on timer bar
+      if (fillEl) {
+        fillEl.style.animation = 'none';
+        fillEl.offsetHeight; /* trigger reflow */
+        fillEl.style.animation = 'timerCountdown 3s linear forwards';
+      }
+
+      overlay.classList.add("open");
+
+      if (successTickTimeout) clearTimeout(successTickTimeout);
+
+      // Auto dismiss after exactly 3 seconds
+      successTickTimeout = setTimeout(() => {
+        closeSuccessTick();
+      }, 3000);
+    }
+
+    function closeSuccessTick() {
+      const overlay = document.getElementById("successTickOverlay");
+      if (overlay) overlay.classList.remove("open");
+      if (successTickTimeout) clearTimeout(successTickTimeout);
     }
 
     /* ── Preview Permanent Size Chart Modal ── */
