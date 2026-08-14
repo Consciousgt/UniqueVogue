@@ -468,36 +468,56 @@ class OrdersAPI {
 
   /* ── Live Single Order Subscription (Customer Order Tracking) ───────── */
   static subscribeToSingleOrder(orderId, callback) {
-    if (!orderId) return () => {};
+    if (!orderId || typeof callback !== "function") return () => {};
 
-    const cached = OrdersAPI.getOrders().find(o => o.id === orderId);
-    if (cached && typeof callback === "function") callback(cached);
+    const cleanId = orderId.trim();
+    if (!cleanId) {
+      callback(null);
+      return () => {};
+    }
+
+    // 1. Check local storage
+    const cached = OrdersAPI.getOrders().find(o => o.id && o.id.toLowerCase() === cleanId.toLowerCase());
+    if (cached) callback(cached);
 
     const activeDb = _getDb();
+    let foundRemotely = !!cached;
 
-    // Channel A: WebSocket
+    // 2. Channel A: WebSocket
     if (activeDb) {
       try {
-        const orderRef = activeDb.ref(`${ORDERS_REF}/${orderId}`);
+        const orderRef = activeDb.ref(`${ORDERS_REF}/${cleanId}`);
         orderRef.on("value", (snap) => {
           const order = snap.val();
-          if (order && typeof callback === "function") callback(order);
+          if (order && typeof order === "object" && order.id) {
+            foundRemotely = true;
+            callback(order);
+          } else if (!foundRemotely) {
+            callback(null);
+          }
         });
       } catch (e) {}
     }
 
-    // Channel B: REST Fetch
-    fetch(`${FIREBASE_REST_BASE}/orders/${orderId}.json?_t=${Date.now()}`, { cache: 'no-store' })
+    // 3. Channel B: Direct HTTPS REST Fetch
+    fetch(`${FIREBASE_REST_BASE}/orders/${cleanId}.json?_t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(order => {
-        if (order && typeof callback === "function") callback(order);
+        if (order && typeof order === "object" && order.id) {
+          foundRemotely = true;
+          callback(order);
+        } else if (!foundRemotely) {
+          callback(null);
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!foundRemotely) callback(null);
+      });
 
     return () => {
       const dbInstance = _getDb();
       if (dbInstance) {
-        try { dbInstance.ref(`${ORDERS_REF}/${orderId}`).off("value"); } catch (e) {}
+        try { dbInstance.ref(`${ORDERS_REF}/${cleanId}`).off("value"); } catch (e) {}
       }
     };
   }

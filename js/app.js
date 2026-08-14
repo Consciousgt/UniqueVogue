@@ -1,10 +1,10 @@
 /* ==========================================================================
-   UNIFIED VOGUE - CORE APP CONTROLLER
+   UNIFIED VOGUE — CORE APP CONTROLLER & GLOBAL UTILITIES
    ========================================================================== */
 
 class App {
   static formatMoney(amount) {
-    return "₦" + Number(amount).toLocaleString('en-NG');
+    return "₦" + Number(amount || 0).toLocaleString('en-NG');
   }
 
   static showToast(message, type = 'success') {
@@ -34,7 +34,6 @@ class App {
         this.showToast(`Copied: ${text}`);
       });
     } else {
-      // Fallback for older browsers
       const el = document.createElement('textarea');
       el.value = text;
       document.body.appendChild(el);
@@ -44,10 +43,50 @@ class App {
       this.showToast(`Copied: ${text}`);
     }
   }
+
+  /* ── Universal Mobile Navigation Controller ── */
+  static initNavigation() {
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    const close  = document.getElementById('navClose');
+
+    if (toggle && links) {
+      toggle.onclick = (e) => {
+        e.stopPropagation();
+        links.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      };
+
+      if (close) {
+        close.onclick = (e) => {
+          e.stopPropagation();
+          links.classList.remove('open');
+          document.body.style.overflow = '';
+        };
+      }
+
+      links.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          links.classList.remove('open');
+          document.body.style.overflow = '';
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (links.classList.contains('open') && !links.contains(e.target) && !toggle.contains(e.target)) {
+          links.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+      });
+    }
+  }
 }
 
-// Mark active nav link based on current page
+// Global initialization
 document.addEventListener("DOMContentLoaded", () => {
+  App.initNavigation();
+
+  // Highlight active nav item
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   document.querySelectorAll(".nav-links a").forEach(link => {
     const href = link.getAttribute("href");

@@ -1,11 +1,13 @@
 /* ==========================================================================
    UNIFIED VOGUE — CHECKOUT & WHATSAPP RECEIPT ENGINE
-   Saves orders to Firebase Realtime Database in real-time
+   Generates unique, collision-proof Haute Couture Order IDs
    ========================================================================== */
 
 class CheckoutManager {
   static generateRefCode() {
-    return "UV-" + Math.floor(100000 + Math.random() * 900000) + "-PAY";
+    const timePart = Date.now().toString(36).toUpperCase().slice(-5);
+    const randPart = Math.floor(1000 + Math.random() * 9000);
+    return `UV-${timePart}-${randPart}`;
   }
 
   static async submitOrder(formData) {

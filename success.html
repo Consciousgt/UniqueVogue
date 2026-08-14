@@ -27,123 +27,154 @@
           <span class="nav-brand-tag">Your Outfits Speaks Fashion</span>
         </div>
       </a>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <a href="shop.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-bag-shopping"></i> Continue Shopping</a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="success.html" class="active"><i class="fa-solid fa-truck-fast"></i> Track Order</a></li>
+        <li><a href="index.html#contactSection">Contact</a></li>
+        <span class="nav-close" id="navClose"><i class="fa-solid fa-xmark"></i></span>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="cart.html" class="nav-icon" title="Shopping Bag">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="nav-badge" id="navCartBadge">0</span>
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>
       </div>
     </div>
   </nav>
 
-  <div class="success-page" style="padding: 40px 16px 80px;">
+  <div class="success-page" style="padding: 36px 14px 80px;">
     <div class="success-card" style="max-width:680px; width:100%;">
       
-      <!-- Lookup / Search Form -->
-      <div style="margin-bottom:20px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--r-md); padding:12px 16px; display:flex; gap:8px; align-items:center;">
-        <i class="fa-solid fa-magnifying-glass" style="color:var(--gold);"></i>
-        <input type="text" id="trackInput" placeholder="Enter Order Ref (e.g. UV-894021-PAY)" style="background:transparent; border:none; color:var(--white); font-size:0.88rem; flex:1; outline:none; font-family:monospace;" />
-        <button class="btn btn-gold btn-sm" onclick="trackNewRef()" style="padding:6px 14px; font-size:0.78rem;">Track</button>
+      <!-- Lookup / Search Form Header -->
+      <div style="margin-bottom:24px; background:rgba(255,255,255,0.025); border:1px solid var(--border-gold); border-radius:var(--r-md); padding:12px 16px; display:flex; gap:8px; align-items:center;">
+        <i class="fa-solid fa-magnifying-glass" style="color:var(--gold); font-size:0.95rem;"></i>
+        <input type="text" id="trackInput" placeholder="Enter Order Reference (e.g. UV-9KL2Z-8492)" style="background:transparent; border:none; color:var(--white); font-size:0.9rem; flex:1; outline:none; font-family:monospace; text-transform:uppercase;" />
+        <button class="btn btn-gold btn-sm" onclick="handleTrackSearch()" style="padding:8px 16px; font-size:0.8rem; white-space:nowrap;">
+          <i class="fa-solid fa-truck-fast"></i> Track
+        </button>
       </div>
 
-      <div class="success-icon" id="successIcon">
-        <i class="fa-solid fa-check"></i>
+      <!-- State 1: Order Found Container -->
+      <div id="orderFoundView" style="display:none;">
+        <div class="success-icon" id="successIcon">
+          <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h1 class="serif" id="successHeading" style="font-size:1.8rem; margin-bottom:6px;">Order Live Tracker</h1>
+        <p id="customerGreeting" style="color:var(--grey); font-size:0.88rem; margin-bottom:12px;">Order Reference Code:</p>
+        <div class="ref-code" id="refDisplay">UV-XXXXX-XXXX</div>
+
+        <!-- Real-time Live Status Badge -->
+        <div id="orderStatusBadge" style="margin-bottom:20px;"></div>
+
+        <!-- 5-Stage Live Visual Progress Tracker -->
+        <div class="order-tracker-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px; flex-wrap:wrap; gap:6px;">
+            <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--gold); font-weight:700;">
+              <i class="fa-solid fa-satellite-dish fa-beat-fade"></i> Live Dispatch Timeline
+            </div>
+            <div id="liveUpdatedTime" style="font-size:0.72rem; color:var(--grey-dim);">
+              Real-time synchronization active
+            </div>
+          </div>
+
+          <div class="order-timeline">
+            <div class="timeline-progress-bar" id="timelineBar" style="width: 0%;"></div>
+
+            <div class="timeline-step" id="step1">
+              <div class="step-node"><i class="fa-solid fa-receipt"></i></div>
+              <div class="step-lbl">Order Placed</div>
+            </div>
+
+            <div class="timeline-step" id="step2">
+              <div class="step-node"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="step-lbl">Payment Confirmed</div>
+            </div>
+
+            <div class="timeline-step" id="step3">
+              <div class="step-node"><i class="fa-solid fa-box-open"></i></div>
+              <div class="step-lbl">Packaging &amp; Prep</div>
+            </div>
+
+            <div class="timeline-step" id="step4">
+              <div class="step-node"><i class="fa-solid fa-truck-fast"></i></div>
+              <div class="step-lbl">Dispatched</div>
+            </div>
+
+            <div class="timeline-step" id="step5">
+              <div class="step-node"><i class="fa-solid fa-house-chimney"></i></div>
+              <div class="step-lbl">Delivered</div>
+            </div>
+          </div>
+
+          <div id="statusNotice" style="background:rgba(255,255,255,0.03); border-radius:var(--r-sm); padding:12px 14px; font-size:0.82rem; color:var(--grey-light); line-height:1.5; margin-top:14px; border-left:3px solid var(--gold);"></div>
+        </div>
+
+        <!-- Order Summary Card -->
+        <div id="orderItemsSummary" style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-bottom:20px; text-align:left;">
+          <h4 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:var(--gold-light); margin-bottom:10px;">
+            <i class="fa-solid fa-bag-shopping"></i> Order Items Summary
+          </h4>
+          <div id="orderItemsList" style="font-size:0.84rem; color:var(--grey); margin-bottom:10px;"></div>
+          <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:8px; font-size:0.92rem; font-weight:700;">
+            <span>Total Paid:</span>
+            <span id="orderTotalPaid" style="color:var(--gold-light);">₦0</span>
+          </div>
+        </div>
+
+        <!-- Payment & WhatsApp Action Box -->
+        <div class="steps-box" id="paymentStepsBox">
+          <h4 style="font-size:0.88rem;"><i class="fa-solid fa-credit-card" style="color:var(--gold);"></i> Payment Verification Details:</h4>
+          <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-text">Bank: <strong>Opay</strong> · Account: <strong>6584992459</strong> (Name: <strong>CHIOMA PEACE OKAFOR</strong>)</span>
+          </div>
+          <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-text">Click the WhatsApp button below to submit your transfer receipt to Angela.</span>
+          </div>
+          <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-text">The admin will confirm payment and your timeline status above will automatically turn green!</span>
+          </div>
+        </div>
+
+        <a href="#" id="waBtn" class="wa-cta" target="_blank" style="margin-bottom:10px;">
+          <i class="fa-brands fa-whatsapp"></i>
+          Send Payment Receipt on WhatsApp
+        </a>
+
+        <button id="cancelOrderBtn" class="btn btn-outline btn-full" onclick="cancelCustomerOrder()" style="border-color:rgba(230,57,70,0.4); color:#e63946; margin-bottom:10px;">
+          <i class="fa-solid fa-ban"></i> Cancel This Order
+        </button>
       </div>
 
-      <h1 class="serif" id="successHeading" style="font-size:1.8rem; margin-bottom:6px;">Order Live Tracker</h1>
-      <p style="color:var(--grey); font-size:0.88rem; margin-bottom:12px;">Order Reference Code:</p>
-      <div class="ref-code" id="refDisplay">UV-XXXXXX-PAY</div>
-
-      <!-- Real-time Live Status Badge -->
-      <div id="orderStatusBadge" style="margin-bottom:20px;">
-        <span class="badge" style="background:rgba(243,156,18,0.15); border:1px solid rgba(243,156,18,0.4); color:#f39c12; font-size:0.85rem; padding:6px 16px;">
-          <i class="fa-solid fa-circle-dot fa-fade"></i> Connecting to Live Order Tracker...
-        </span>
-      </div>
-
-      <!-- 5-Stage Live Visual Progress Tracker -->
-      <div class="order-tracker-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
-          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--gold); font-weight:700;">
-            <i class="fa-solid fa-satellite-dish fa-beat-fade"></i> Live Dispatch Timeline
-          </div>
-          <div id="liveUpdatedTime" style="font-size:0.72rem; color:var(--grey-dim);">
-            Real-time synchronization active
-          </div>
+      <!-- State 2: No Order / Search Initial State -->
+      <div id="orderNotFoundView" style="display:block; padding:30px 10px;">
+        <div style="width:70px; height:70px; border-radius:50%; background:rgba(197,160,89,0.1); border:1px solid var(--border-gold); display:flex; align-items:center; justify-content:center; margin:0 auto 18px; font-size:1.8rem; color:var(--gold);">
+          <i class="fa-solid fa-box-archive"></i>
         </div>
-
-        <div class="order-timeline">
-          <div class="timeline-progress-bar" id="timelineBar" style="width: 0%;"></div>
-
-          <div class="timeline-step" id="step1">
-            <div class="step-node"><i class="fa-solid fa-receipt"></i></div>
-            <div class="step-lbl">Order Placed</div>
-          </div>
-
-          <div class="timeline-step" id="step2">
-            <div class="step-node"><i class="fa-solid fa-circle-check"></i></div>
-            <div class="step-lbl">Payment Confirmed</div>
-          </div>
-
-          <div class="timeline-step" id="step3">
-            <div class="step-node"><i class="fa-solid fa-box-open"></i></div>
-            <div class="step-lbl">Packaging &amp; Prep</div>
-          </div>
-
-          <div class="timeline-step" id="step4">
-            <div class="step-node"><i class="fa-solid fa-truck-fast"></i></div>
-            <div class="step-lbl">Dispatched</div>
-          </div>
-
-          <div class="timeline-step" id="step5">
-            <div class="step-node"><i class="fa-solid fa-house-chimney"></i></div>
-            <div class="step-lbl">Delivered</div>
-          </div>
-        </div>
-
-        <div id="statusNotice" style="background:rgba(255,255,255,0.03); border-radius:var(--r-sm); padding:12px 14px; font-size:0.82rem; color:var(--grey-light); line-height:1.5; margin-top:14px; border-left:3px solid var(--gold);">
-          Your order has been initiated. Complete payment to Opay (6584992459 - CHIOMA PEACE OKAFOR) and send your receipt on WhatsApp below.
+        <h2 class="serif" id="notFoundTitle" style="font-size:1.6rem; margin-bottom:8px;">Live Haute Couture Dispatch Tracking</h2>
+        <p id="notFoundMsg" style="color:var(--grey); font-size:0.88rem; max-width:440px; margin:0 auto 24px; line-height:1.6;">
+          Please enter your unique <strong>Order Reference Code</strong> (e.g. <code>UV-9KL2Z-8492</code>) provided upon checkout or in your WhatsApp receipt to track your order in real time.
+        </p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <a href="shop.html" class="btn btn-gold"><i class="fa-solid fa-bag-shopping"></i> Explore Collection</a>
+          <a href="index.html" class="btn btn-outline"><i class="fa-solid fa-house"></i> Return to Home</a>
         </div>
       </div>
 
-      <!-- Order Summary Card -->
-      <div id="orderItemsSummary" style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-bottom:20px; text-align:left; display:none;">
-        <h4 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:var(--gold-light); margin-bottom:10px;">
-          <i class="fa-solid fa-bag-shopping"></i> Order Items Summary
-        </h4>
-        <div id="orderItemsList" style="font-size:0.84rem; color:var(--grey); margin-bottom:10px;"></div>
-        <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:8px; font-size:0.92rem; font-weight:700;">
-          <span>Total Paid:</span>
-          <span id="orderTotalPaid" style="color:var(--gold-light);">₦0</span>
-        </div>
+      <!-- State 3: Connecting / Loading Shimmer -->
+      <div id="orderLoadingView" style="display:none; padding:40px 10px;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:2.4rem; color:var(--gold); display:block; margin:0 auto 16px;"></i>
+        <h3 class="serif" style="font-size:1.3rem; margin-bottom:6px;">Connecting to Live Tracking System...</h3>
+        <p style="color:var(--grey); font-size:0.85rem;">Retrieving real-time dispatch status from Unified Vogue atelier</p>
       </div>
 
-      <!-- Payment & WhatsApp Action Box -->
-      <div class="steps-box" id="paymentStepsBox">
-        <h4 style="font-size:0.88rem;"><i class="fa-solid fa-credit-card" style="color:var(--gold);"></i> Payment Verification Details:</h4>
-        <div class="step">
-          <span class="step-num">1</span>
-          <span class="step-text">Bank: <strong>Opay</strong> · Account: <strong>6584992459</strong> (Name: <strong>CHIOMA PEACE OKAFOR</strong>)</span>
-        </div>
-        <div class="step">
-          <span class="step-num">2</span>
-          <span class="step-text">Click the WhatsApp button below to submit your payment proof to Angela.</span>
-        </div>
-        <div class="step">
-          <span class="step-num">3</span>
-          <span class="step-text">The admin will confirm payment and your timeline status above will automatically turn green!</span>
-        </div>
-      </div>
-
-      <a href="#" id="waBtn" class="wa-cta" target="_blank" style="margin-bottom:10px;">
-        <i class="fa-brands fa-whatsapp"></i>
-        Send Payment Receipt on WhatsApp
-      </a>
-
-      <button id="cancelOrderBtn" class="btn btn-outline btn-full" onclick="cancelCustomerOrder()" style="border-color:rgba(230,57,70,0.4); color:#e63946; margin-bottom:10px;">
-        <i class="fa-solid fa-ban"></i> Cancel This Order
-      </button>
-
-      <a href="shop.html" class="btn btn-outline btn-full">
-        <i class="fa-solid fa-bag-shopping"></i> Return to Shop
-      </a>
     </div>
   </div>
 
@@ -155,47 +186,98 @@
   <script src="js/firebase-config.js"></script>
 
   <script>
-    let currentRef = '';
+    let activeRef = '';
     let unsubscribeOrder = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      currentRef = urlParams.get('ref') || 'UV-894021-PAY';
-      const waUrl = urlParams.get('wa') || `https://wa.me/2349126284759?text=${encodeURIComponent('Hello Unified Vogue, I am checking on order ' + currentRef)}`;
+      const queryRef = urlParams.get('ref');
 
-      document.getElementById('refDisplay').textContent = currentRef;
-      document.getElementById('trackInput').value = currentRef;
-      document.getElementById('waBtn').setAttribute('href', decodeURIComponent(waUrl));
+      if (queryRef && queryRef.trim().length > 0) {
+        activeRef = queryRef.trim().toUpperCase();
+        document.getElementById('trackInput').value = activeRef;
+        startLiveTracking(activeRef);
+      } else {
+        showNotFoundState(false);
+      }
 
-      startLiveTracking(currentRef);
+      document.getElementById('trackInput').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') handleTrackSearch();
+      });
     });
 
-    function trackNewRef() {
+    function handleTrackSearch() {
       const input = document.getElementById('trackInput').value.trim().toUpperCase();
-      if (!input) return;
-      currentRef = input;
-      document.getElementById('refDisplay').textContent = currentRef;
-      window.history.replaceState(null, '', `success.html?ref=${currentRef}`);
-      startLiveTracking(currentRef);
+      if (!input) {
+        App.showToast("Please enter an Order Reference Code", "error");
+        return;
+      }
+      activeRef = input;
+      window.history.replaceState(null, '', `success.html?ref=${encodeURIComponent(activeRef)}`);
+      startLiveTracking(activeRef);
     }
 
     function startLiveTracking(ref) {
       if (unsubscribeOrder) unsubscribeOrder();
 
+      document.getElementById('orderFoundView').style.display = 'none';
+      document.getElementById('orderNotFoundView').style.display = 'none';
+      document.getElementById('orderLoadingView').style.display = 'block';
+
       if (typeof OrdersAPI !== "undefined") {
         unsubscribeOrder = OrdersAPI.subscribeToSingleOrder(ref, (order) => {
-          updateTrackingUI(order);
+          document.getElementById('orderLoadingView').style.display = 'none';
+          if (order && order.id) {
+            updateTrackingUI(order);
+          } else {
+            showNotFoundState(true, ref);
+          }
         });
+      } else {
+        document.getElementById('orderLoadingView').style.display = 'none';
+        showNotFoundState(true, ref);
+      }
+    }
+
+    function showNotFoundState(wasSearched = false, refCode = '') {
+      document.getElementById('orderFoundView').style.display = 'none';
+      document.getElementById('orderLoadingView').style.display = 'none';
+      document.getElementById('orderNotFoundView').style.display = 'block';
+
+      const titleEl = document.getElementById('notFoundTitle');
+      const msgEl = document.getElementById('notFoundMsg');
+
+      if (wasSearched) {
+        titleEl.textContent = 'Order Not Found';
+        msgEl.innerHTML = `We could not find any active order matching reference <strong style="color:var(--gold); font-family:monospace;">${refCode}</strong>.<br><br>Please check your order code from your WhatsApp receipt or place a new order below.`;
+      } else {
+        titleEl.textContent = 'Live Haute Couture Dispatch Tracking';
+        msgEl.innerHTML = `Please enter your unique <strong>Order Reference Code</strong> (e.g. <code>UV-9KL2Z-8492</code>) provided upon checkout or in your WhatsApp receipt to track your order in real time.`;
       }
     }
 
     function updateTrackingUI(order) {
+      document.getElementById('orderNotFoundView').style.display = 'none';
+      document.getElementById('orderLoadingView').style.display = 'none';
+      document.getElementById('orderFoundView').style.display = 'block';
+
       const badgeEl = document.getElementById('orderStatusBadge');
       const cancelBtn = document.getElementById('cancelOrderBtn');
       const noticeEl = document.getElementById('statusNotice');
       const iconEl = document.getElementById('successIcon');
       const headingEl = document.getElementById('successHeading');
       const liveTimeEl = document.getElementById('liveUpdatedTime');
+      const greetingEl = document.getElementById('customerGreeting');
+      const refDisplay = document.getElementById('refDisplay');
+      const waBtn = document.getElementById('waBtn');
+
+      refDisplay.textContent = order.id;
+
+      const custName = (order.customer && order.customer.name) ? order.customer.name : 'Valued Customer';
+      greetingEl.innerHTML = `Hello <strong>${custName}</strong>, tracking for Haute Couture order:`;
+
+      const defaultWa = `https://wa.me/2349126284759?text=${encodeURIComponent('Hello Unified Vogue, this is ' + custName + ' inquiring about order ' + order.id)}`;
+      waBtn.setAttribute('href', defaultWa);
 
       const s1 = document.getElementById('step1');
       const s2 = document.getElementById('step2');
@@ -205,11 +287,9 @@
       const bar = document.getElementById('timelineBar');
 
       // Reset step classes
-      [s1, s2, s3, s4, s5].forEach(s => {
-        s.className = 'timeline-step';
-      });
+      [s1, s2, s3, s4, s5].forEach(s => { s.className = 'timeline-step'; });
 
-      const status = (order && order.status) ? order.status : 'Payment Pending Confirmation';
+      const status = order.status || 'Payment Pending Confirmation';
       const isCancelled = status === 'Cancelled by Customer' || status === 'Cancelled / Failed';
 
       liveTimeEl.textContent = `Status updated live: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
@@ -248,14 +328,14 @@
         iconEl.style.borderColor = '#25D366';
         iconEl.innerHTML = `<i class="fa-solid fa-truck-ramp-box" style="color:#25D366;"></i>`;
         noticeEl.style.borderLeftColor = '#25D366';
-        noticeEl.innerHTML = `🚀 Your package has been dispatched by Unified Vogue! The courier / rider is en route to your delivery address.`;
+        noticeEl.innerHTML = `🚀 Your package has been dispatched by Unified Vogue! The courier is en route to <strong>${(order.customer && order.customer.address) ? order.customer.address : 'your delivery address'}</strong>.`;
         s1.classList.add('completed');
         s2.classList.add('completed');
         s3.classList.add('completed');
         s4.classList.add('active');
         bar.style.width = '75%';
       } else if (status.includes('Processing') || status.includes('Packaging')) {
-        badgeEl.innerHTML = `<span class="badge" style="background:#3a86ff; color:#fff; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-boxes-packing"></i> Processing & Packaging</span>`;
+        badgeEl.innerHTML = `<span class="badge" style="background:#3a86ff; color:#fff; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-boxes-packing"></i> Packaging & Processing</span>`;
         headingEl.textContent = 'Preparing Your Outfits';
         noticeEl.style.borderLeftColor = '#3a86ff';
         noticeEl.innerHTML = `📦 Your payment is confirmed and our bespoke atelier is tailoring and packaging your luxury pieces for dispatch.`;
@@ -280,16 +360,16 @@
         noticeEl.innerHTML = `Please transfer payment into Opay (6584992459 - CHIOMA PEACE OKAFOR) and click below to send receipt on WhatsApp.`;
       }
 
-      // Render Order Items Summary if available
-      if (order && order.items && order.items.length > 0) {
+      // Render Order Items Summary
+      if (order.items && order.items.length > 0) {
         const itemsBox = document.getElementById('orderItemsSummary');
         const list = document.getElementById('orderItemsList');
         const totalEl = document.getElementById('orderTotalPaid');
         itemsBox.style.display = 'block';
 
         list.innerHTML = order.items.map(item => `
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span>• ${item.name} (${item.size}) x${item.qty}</span>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.83rem;">
+            <span>• ${item.name} (${item.size}) × ${item.qty}</span>
             <span style="font-weight:600; color:var(--white);">${App.formatMoney(item.price * item.qty)}</span>
           </div>
         `).join('');
@@ -299,13 +379,13 @@
     }
 
     function cancelCustomerOrder() {
-      if (!currentRef) return;
+      if (!activeRef) return;
 
-      if (confirm(`Are you sure you want to cancel order ${currentRef}?`)) {
+      if (confirm(`Are you sure you want to cancel order ${activeRef}?`)) {
         if (typeof OrdersAPI !== "undefined") {
-          OrdersAPI.updateOrderStatus(currentRef, 'Cancelled by Customer');
+          OrdersAPI.updateOrderStatus(activeRef, 'Cancelled by Customer');
         }
-        App.showToast(`Order ${currentRef} has been cancelled`);
+        App.showToast(`Order ${activeRef} has been cancelled`);
       }
     }
   </script>
