@@ -229,10 +229,15 @@
         return;
       }
 
-      grid.innerHTML = list.map(p => `
-        <div class="prod-card">
+      grid.innerHTML = list.map(p => {
+        const isSoldOut = p.stock <= 0 || (p.badge && p.badge.toLowerCase().includes('sold out'));
+        const badgeText = isSoldOut ? 'Sold Out' : (p.badge || 'New');
+        const badgeStyle = isSoldOut ? 'background:#e63946; color:#fff;' : '';
+
+        return `
+        <div class="prod-card" style="${isSoldOut ? 'opacity:0.88;' : ''}">
           <div class="prod-thumb">
-            <span class="badge">${p.badge || 'New'}</span>
+            <span class="badge" style="${badgeStyle}">${badgeText}</span>
             <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='images/logo.jpg'" />
           </div>
           <div class="prod-body">
@@ -241,13 +246,18 @@
             <div class="prod-price">${App.formatMoney(p.price)}</div>
             <div class="prod-actions">
               <a href="product.html?id=${p.id}" class="btn btn-outline">Details</a>
-              <button class="btn btn-gold" onclick="CartManager.addToCart('${p.id}')">
-                <i class="fa-solid fa-bag-shopping"></i> Add
-              </button>
+              ${isSoldOut
+                ? `<button class="btn btn-outline" disabled style="opacity:0.5; cursor:not-allowed; border-color:var(--border);">
+                    <i class="fa-solid fa-ban"></i> Sold Out
+                   </button>`
+                : `<button class="btn btn-gold" onclick="CartManager.addToCart('${p.id}')">
+                    <i class="fa-solid fa-bag-shopping"></i> Add
+                   </button>`
+              }
             </div>
           </div>
         </div>
-      `).join('');
+      `;}).join('');
     }
 
     document.addEventListener("DOMContentLoaded", () => {

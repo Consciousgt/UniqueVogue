@@ -211,7 +211,7 @@
 
         <div class="detail-info">
           <div class="detail-badge-row">
-            <span class="badge">${p.badge || 'New'}</span>
+            <span class="badge" style="${p.stock <= 0 ? 'background:#e63946; color:#fff;' : ''}">${p.stock <= 0 ? 'Sold Out' : (p.badge || 'New')}</span>
             <span class="detail-cat">${p.category}</span>
           </div>
 
@@ -219,7 +219,7 @@
 
           <div class="detail-stars">
             <span class="stars">★★★★★</span>
-            <span class="star-note">${p.rating} rating · ${p.stock} in stock</span>
+            <span class="star-note">${p.rating} rating · ${p.stock <= 0 ? '<strong style="color:#e63946;">Currently Sold Out</strong>' : `${p.stock} in stock`}</span>
           </div>
 
           <div class="detail-price">${App.formatMoney(p.price)}</div>
@@ -254,9 +254,14 @@
           </div>
 
           <div class="detail-cta">
-            <button type="button" class="btn btn-gold" onclick="addToBag()">
-              <i class="fa-solid fa-bag-shopping"></i> Add to Bag
-            </button>
+            ${p.stock <= 0
+              ? `<button type="button" class="btn btn-outline" disabled style="opacity:0.5; cursor:not-allowed; border-color:var(--border);">
+                  <i class="fa-solid fa-ban"></i> Currently Sold Out
+                 </button>`
+              : `<button type="button" class="btn btn-gold" onclick="addToBag()">
+                  <i class="fa-solid fa-bag-shopping"></i> Add to Bag
+                 </button>`
+            }
             <a href="cart.html" class="btn btn-outline">
               <i class="fa-solid fa-bag-shopping"></i> View Bag
             </a>

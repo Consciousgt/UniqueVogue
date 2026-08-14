@@ -47,33 +47,48 @@ class AdminManager {
     }
 
     tbody.innerHTML = products.map(p => {
+      const isSoldOut = p.stock <= 0 || (p.badge && p.badge.toLowerCase().includes('sold out'));
+
       return `
-      <tr>
+      <tr style="${isSoldOut ? 'background:rgba(230,57,70,0.03);' : ''}">
         <td><img src="${p.image}" alt="${p.name}" onerror="this.src='images/logo.jpg'" /></td>
         <td>
           <div class="admin-prod-name">${p.name}</div>
           <div style="font-size:0.72rem; color:var(--grey-dim);">${p.sizes ? p.sizes.join(', ') : 'S, M, L, XL, 2XL'}</div>
         </td>
-        <td><span class="admin-cat">${p.category}</span></td>
+        <td>
+          <span class="admin-cat">${p.category}</span>
+          ${isSoldOut ? '<span style="display:inline-block; margin-left:4px; background:#e63946; color:#fff; padding:2px 7px; border-radius:var(--r-full); font-size:0.65rem; font-weight:700; text-transform:uppercase;">Sold Out</span>' : ''}
+        </td>
         <td class="admin-price">${App.formatMoney(p.price)}</td>
         <td>
-          <span style="color:${p.stock > 5 ? 'var(--white)' : '#e63946'}; font-weight:700;">${p.stock}</span>
-          <span style="font-size:0.75rem; color:var(--grey-dim);">in stock</span>
+          ${isSoldOut
+            ? '<span style="color:#e63946; font-weight:700; font-size:0.82rem;"><i class="fa-solid fa-ban"></i> 0</span> <span style="font-size:0.72rem; color:#e63946;">(Sold Out)</span>'
+            : `<span style="color:${p.stock > 5 ? 'var(--white)' : '#f39c12'}; font-weight:700;">${p.stock}</span> <span style="font-size:0.75rem; color:var(--grey-dim);">in stock</span>`
+          }
         </td>
         <td>
-          <button type="button" onclick="openPreviewPermanentSizeChart('${p.name}')"
+          <button type="button" onclick="openPreviewPermanentSizeChart('${p.name.replace(/'/g, "\\'")}')"
             style="display:inline-flex; align-items:center; gap:5px; background:rgba(197,160,89,0.12); border:1px solid var(--border-gold); color:var(--gold); padding:5px 12px; border-radius:var(--r-full); font-size:0.74rem; font-weight:700; cursor:pointer; font-family:var(--font-s); transition:var(--ease);"
             title="Permanent Standard Size Chart (Length, Shoulder, Sleeve, Chest in inches)">
             <i class="fa-solid fa-circle-check"></i> Standard Chart
           </button>
         </td>
         <td>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:0.72rem;" onclick="AdminManager.quickEditStock('${p.id}')">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+            <button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:0.72rem;" onclick="AdminManager.quickEditStock('${p.id}')" title="Edit Price & Stock">
               <i class="fa-solid fa-pen"></i> Edit
             </button>
-            <button class="del-btn" onclick="AdminManager.deleteProd('${p.id}')">
-              <i class="fa-solid fa-trash-can"></i>
+            ${isSoldOut
+              ? `<button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:0.72rem; color:#25D366; border-color:rgba(37,211,102,0.4);" onclick="AdminManager.restockProd('${p.id}')" title="Add new inventory stock">
+                  <i class="fa-solid fa-boxes-packing"></i> Restock
+                 </button>`
+              : `<button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:0.72rem; color:#f39c12; border-color:rgba(243,156,18,0.4);" onclick="AdminManager.markSoldOut('${p.id}')" title="Set stock to 0 (Mark item as Sold Out)">
+                  <i class="fa-solid fa-tag"></i> Sold Out
+                 </button>`
+            }
+            <button class="del-btn" style="padding:5px 12px; font-size:0.74rem; display:inline-flex; align-items:center; gap:5px;" onclick="AdminManager.deleteProd('${p.id}')" title="Permanently delete from store catalog">
+              <i class="fa-solid fa-trash-can"></i> Delete
             </button>
           </div>
         </td>
@@ -207,10 +222,42 @@ class AdminManager {
     this.initAdminDashboard();
   }
 
+  static async markSoldOut(id) {
+    const prod = ProductsAPI.getProductById(id);
+    if (!prod) return;
+
+    if (confirm(`Mark "${prod.name}" as SOLD OUT?\n\nThis sets the stock to 0 and updates the storefront across all customer devices immediately.`)) {
+      await ProductsAPI.updateProduct(id, { stock: 0, badge: "Sold Out" });
+      App.showToast(`"${prod.name}" is now marked as Sold Out.`);
+      this.initAdminDashboard();
+    }
+  }
+
+  static async restockProd(id) {
+    const prod = ProductsAPI.getProductById(id);
+    if (!prod) return;
+
+    const input = prompt(`Enter new inventory quantity to restock for "${prod.name}":`, "15");
+    if (input === null) return;
+
+    const qty = Number(input);
+    if (isNaN(qty) || qty <= 0) {
+      App.showToast("Please enter a valid stock number greater than 0", "error");
+      return;
+    }
+
+    await ProductsAPI.updateProduct(id, { stock: qty, badge: "Available" });
+    App.showToast(`"${prod.name}" restocked with ${qty} units!`);
+    this.initAdminDashboard();
+  }
+
   static async deleteProd(id) {
-    if (confirm("Are you sure you want to remove this product from the store catalog?")) {
+    const prod = ProductsAPI.getProductById(id);
+    const prodName = prod ? prod.name : "this product";
+
+    if (confirm(`Delete "${prodName}" from the store catalog?\n\n⚠️ This will permanently remove this item from the store across ALL devices and customers will no longer see it.`)) {
       await ProductsAPI.deleteProduct(id);
-      App.showToast("Product removed from catalog across all devices");
+      App.showToast(`"${prodName}" has been deleted from the catalog across all devices`);
       this.initAdminDashboard();
     }
   }

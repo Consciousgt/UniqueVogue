@@ -225,10 +225,16 @@ class ProductsAPI {
 
   /* ── DELETE PRODUCT ──────────────────────────────────────────────────── */
   static async deleteProduct(id) {
-    await db.ref(`${CATALOG_REF}/${id}`).remove();
+    try {
+      await db.ref(`${CATALOG_REF}/${id}`).remove();
+    } catch (e) {
+      console.warn("[Unified Vogue] Firebase delete error:", e);
+    }
 
     const products = ProductsAPI.getProducts().filter(p => p.id !== id);
     _cacheProducts(products);
+    window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
+    return true;
   }
 
   /* ── RESET to official 5 shirts ──────────────────────────────────────── */
