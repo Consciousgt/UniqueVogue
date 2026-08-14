@@ -187,11 +187,28 @@
       if (!p) {
         container.innerHTML = `
           <div style="grid-column:1/-1; text-align:center; padding:80px 20px;">
-            <i class="fa-solid fa-box-open" style="font-size:3rem; color:var(--border-gold); display:block; margin-bottom:14px;"></i>
-            <h2 class="serif" style="margin-bottom:8px;">Product Not Found</h2>
-            <p style="color:var(--grey); margin-bottom:20px;">This item is currently unavailable or still syncing.</p>
-            <a href="shop.html" class="btn btn-gold">Return to Shop</a>
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:3rem; color:var(--gold); display:block; margin-bottom:14px;"></i>
+            <h2 class="serif" style="margin-bottom:8px;">Loading Haute Couture Design...</h2>
+            <p style="color:var(--grey); margin-bottom:20px;">Fetching design specifications from Unified Vogue atelier...</p>
           </div>`;
+
+        // Automatically trigger remote fetch and re-render
+        if (typeof ProductsAPI !== "undefined") {
+          ProductsAPI.fetchRemoteCatalog().then(prods => {
+            const found = prods.find(item => item.id === prodId);
+            if (!found) {
+              container.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:80px 20px;">
+                  <i class="fa-solid fa-box-open" style="font-size:3rem; color:var(--border-gold); display:block; margin-bottom:14px;"></i>
+                  <h2 class="serif" style="margin-bottom:8px;">Product Not Found</h2>
+                  <p style="color:var(--grey); margin-bottom:20px;">This item is currently unavailable or has been removed from catalog.</p>
+                  <a href="shop.html" class="btn btn-gold">Return to Shop</a>
+                </div>`;
+            } else {
+              renderProductDetail();
+            }
+          });
+        }
         return;
       }
 

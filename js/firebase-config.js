@@ -1,8 +1,8 @@
 /* ==========================================================================
-   UNIFIED VOGUE — UNIVERSAL REAL-TIME FIREBASE STORE ENGINE
+   UNIFIED VOGUE — UNIVERSAL REAL-TIME FIREBASE STORE ENGINE (V16 MULTI-CHANNEL)
    • Products Catalog Live Sync across ALL customer devices
    • Live Customer Orders & Sales Tracking directly to Admin Dashboard
-   • Multi-Cloud Fallback & Redundancy
+   • Triple-Channel Redundancy (WebSocket + HTTPS REST + Local Storage)
    ========================================================================== */
 
 /* ── Firebase Configuration ─────────────────────────────────────────────── */
@@ -18,21 +18,27 @@ const firebaseConfig = {
 };
 
 let db = null;
-try {
-  if (typeof firebase !== "undefined") {
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+function _getDb() {
+  if (db) return db;
+  try {
+    if (typeof firebase !== "undefined") {
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.database();
     }
-    db = firebase.database();
+  } catch (e) {
+    console.warn("[Unified Vogue] Firebase init notice:", e.message);
   }
-} catch (e) {
-  console.warn("[Unified Vogue] Firebase init notice:", e.message);
+  return db;
 }
+_getDb();
 
 const CATALOG_REF = "catalog";
 const ORDERS_REF = "orders";
-const DB_KEY = "uv_vogue_catalog_v15";
+const DB_KEY = "uv_vogue_catalog_v16";
 const ORDERS_KEY = "uv_orders_history";
+const FIREBASE_REST_BASE = "https://unifiedvogue-b8a97-default-rtdb.firebaseio.com";
 const CLOUD_BIN_URL = "https://extendsclass.com/api/json-storage/bin/acfdddb";
 
 /* ── Permanent Official Standard Size Chart (Inches) ─────────────────────── */
@@ -118,6 +124,7 @@ const OFFICIAL_CATALOG = [
 
 /* ── Product Helpers ──────────────────────────────────────────────────────── */
 function _attachSizeChart(p) {
+  if (!p) return null;
   return { ...p, sizeChart: OFFICIAL_SIZE_CHART };
 }
 
@@ -138,7 +145,9 @@ function _snapshotToProductArray(data) {
 
 function _cacheProducts(products) {
   if (Array.isArray(products) && products.length > 0) {
-    localStorage.setItem(DB_KEY, JSON.stringify(products));
+    try {
+      localStorage.setItem(DB_KEY, JSON.stringify(products));
+    } catch (e) {}
   }
 }
 
@@ -177,7 +186,8 @@ class ProductsAPI {
   }
 
   static getProductById(id) {
-    const p = this.getProducts().find(p => p.id === id);
+    if (!id) return null;
+    const p = this.getProducts().find(p => p && p.id === id);
     return p ? _attachSizeChart(p) : null;
   }
 
@@ -185,31 +195,42 @@ class ProductsAPI {
   static subscribeToLiveCatalog(callback) {
     // 1. Initial cached render
     const initial = ProductsAPI.getProducts();
-    callback(initial);
+    if (typeof callback === "function") callback(initial);
 
-    // 2. Listen to Firebase
-    if (db) {
+    const activeDb = _getDb();
+
+    // 2. Channel A: Direct Firebase WebSocket Stream
+    if (activeDb) {
       try {
-        const catalogRef = db.ref(CATALOG_REF);
+        const catalogRef = activeDb.ref(CATALOG_REF);
         catalogRef.on("value", (snapshot) => {
           const data = snapshot.val();
           if (data && typeof data === "object" && Object.keys(data).length > 0) {
             const products = _snapshotToProductArray(data);
             _cacheProducts(products);
             window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
-            callback(products);
-          } else {
-            // Seed Firebase if empty
-            ProductsAPI.resetCatalog().then(prods => callback(prods));
+            if (typeof callback === "function") callback(products);
           }
         }, (err) => {
           console.warn("[Unified Vogue] Firebase catalog stream notice:", err.message);
-          callback(ProductsAPI.getProducts());
         });
       } catch (e) {}
     }
 
-    // 3. Fallback Cloud Storage Bin Sync
+    // 3. Channel B: Direct HTTPS REST Fetch (Zero WebSocket dependency)
+    fetch(`${FIREBASE_REST_BASE}/catalog.json?_t=${Date.now()}`, { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data === "object" && Object.keys(data).length > 0) {
+          const products = _snapshotToProductArray(data);
+          _cacheProducts(products);
+          window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
+          if (typeof callback === "function") callback(products);
+        }
+      })
+      .catch(() => {});
+
+    // 4. Channel C: Fallback Cloud Storage Bin Sync
     fetch(`${CLOUD_BIN_URL}?_t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(raw => {
@@ -218,14 +239,15 @@ class ProductsAPI {
           const standardized = _snapshotToProductArray(remoteProducts);
           _cacheProducts(standardized);
           window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
-          callback(standardized);
+          if (typeof callback === "function") callback(standardized);
         }
       })
       .catch(() => {});
 
     return () => {
-      if (db) {
-        try { db.ref(CATALOG_REF).off("value"); } catch (e) {}
+      const dbInstance = _getDb();
+      if (dbInstance) {
+        try { dbInstance.ref(CATALOG_REF).off("value"); } catch (e) {}
       }
     };
   }
@@ -248,16 +270,26 @@ class ProductsAPI {
     _cacheProducts(products);
     window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
 
-    // 2. Sync to Firebase
-    if (db) {
+    // 2. Channel A: Firebase WebSocket
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(`${CATALOG_REF}/${id}`).set(newProd);
+        await activeDb.ref(`${CATALOG_REF}/${id}`).set(newProd);
       } catch (e) {
         console.warn("[Unified Vogue] Firebase write notice:", e.message);
       }
     }
 
-    // 3. Sync to Cloud Storage Bin
+    // 3. Channel B: Direct HTTPS REST PUT
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/catalog/${id}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProd)
+      });
+    } catch (e) {}
+
+    // 4. Channel C: Cloud Storage Bin
     _pushToCloudBin(products);
 
     return newProd;
@@ -274,39 +306,46 @@ class ProductsAPI {
     _cacheProducts(products);
     window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
 
-    // Sync to Firebase
-    if (db) {
+    // Firebase WebSocket
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(`${CATALOG_REF}/${id}`).set(updated);
+        await activeDb.ref(`${CATALOG_REF}/${id}`).set(updated);
       } catch (e) {}
     }
 
-    // Sync to Cloud Storage Bin
-    _pushToCloudBin(products);
+    // Firebase REST
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/catalog/${id}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (e) {}
 
+    _pushToCloudBin(products);
     return updated;
   }
 
   /* ── DELETE PRODUCT (Admin Delete Sold Out / Unavailable Items) ───────── */
   static async deleteProduct(id) {
-    // 1. Remove from local catalog array immediately
     let products = ProductsAPI.getProducts();
     products = products.filter(p => p.id !== id);
     _cacheProducts(products);
     window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
 
-    // 2. Sync deletion to Firebase
-    if (db) {
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(`${CATALOG_REF}/${id}`).remove();
-      } catch (e) {
-        console.warn("[Unified Vogue] Firebase delete notice:", e.message);
-      }
+        await activeDb.ref(`${CATALOG_REF}/${id}`).remove();
+      } catch (e) {}
     }
 
-    // 3. Sync updated catalog array to Cloud Storage Bin
-    _pushToCloudBin(products);
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/catalog/${id}.json`, { method: 'DELETE' });
+    } catch (e) {}
 
+    _pushToCloudBin(products);
     return true;
   }
 
@@ -318,11 +357,20 @@ class ProductsAPI {
     _cacheProducts(OFFICIAL_CATALOG);
     window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: OFFICIAL_CATALOG }));
 
-    if (db) {
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(CATALOG_REF).set(obj);
+        await activeDb.ref(CATALOG_REF).set(obj);
       } catch (e) {}
     }
+
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/catalog.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj)
+      });
+    } catch (e) {}
 
     _pushToCloudBin(OFFICIAL_CATALOG);
     return OFFICIAL_CATALOG;
@@ -330,22 +378,20 @@ class ProductsAPI {
 
   /* ── ONE-TIME FETCH ─────────────────────────────────────────────────── */
   static async fetchRemoteCatalog() {
-    if (db) {
-      try {
-        const snap = await db.ref(CATALOG_REF).once("value");
-        if (snap.exists()) {
-          const products = _snapshotToProductArray(snap.val());
-          _cacheProducts(products);
-          window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
-          return products;
-        }
-      } catch (e) {}
-    }
+    try {
+      const res = await fetch(`${FIREBASE_REST_BASE}/catalog.json?_t=${Date.now()}`);
+      const data = await res.json();
+      if (data && typeof data === "object" && Object.keys(data).length > 0) {
+        const products = _snapshotToProductArray(data);
+        _cacheProducts(products);
+        window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
+        return products;
+      }
+    } catch (e) {}
 
     return ProductsAPI.getProducts();
   }
 
-  /* Legacy stubs for backward compatibility */
   static saveProducts(products) { _cacheProducts(products); }
   static async syncToCloud() { return true; }
 }
@@ -355,7 +401,6 @@ class ProductsAPI {
    ═══════════════════════════════════════════════════════════════════════════ */
 class OrdersAPI {
 
-  /* ── Get Orders from local storage ───────────────────────────────────── */
   static getOrders() {
     try {
       const stored = localStorage.getItem(ORDERS_KEY);
@@ -369,43 +414,90 @@ class OrdersAPI {
 
   static _cacheOrders(orders) {
     if (Array.isArray(orders)) {
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      try {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      } catch (e) {}
     }
   }
 
   /* ── Live Orders Subscription (Admin Dashboard) ─────────────────────── */
   static subscribeToLiveOrders(callback) {
-    // 1. Initial cached render
-    callback(OrdersAPI.getOrders());
+    if (typeof callback === "function") callback(OrdersAPI.getOrders());
 
-    // 2. Listen to Firebase Realtime Database
-    if (db) {
+    const activeDb = _getDb();
+
+    // 1. Channel A: Firebase WebSocket
+    if (activeDb) {
       try {
-        const ordersRef = db.ref(ORDERS_REF);
+        const ordersRef = activeDb.ref(ORDERS_REF);
         ordersRef.on("value", (snapshot) => {
           const data = snapshot.val();
           if (data && typeof data === "object") {
-            const orders = Object.values(data).sort((a, b) => {
-              const dateA = a.timestamp || 0;
-              const dateB = b.timestamp || 0;
-              return dateB - dateA;
-            });
+            const orders = Object.values(data).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             OrdersAPI._cacheOrders(orders);
-            callback(orders);
+            if (typeof callback === "function") callback(orders);
           } else {
             OrdersAPI._cacheOrders([]);
-            callback([]);
+            if (typeof callback === "function") callback([]);
           }
         }, (err) => {
           console.warn("[Unified Vogue] Orders live stream notice:", err.message);
-          callback(OrdersAPI.getOrders());
         });
       } catch (e) {}
     }
 
+    // 2. Channel B: HTTPS REST Fetch
+    fetch(`${FIREBASE_REST_BASE}/orders.json?_t=${Date.now()}`, { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data === "object") {
+          const orders = Object.values(data).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          OrdersAPI._cacheOrders(orders);
+          if (typeof callback === "function") callback(orders);
+        }
+      })
+      .catch(() => {});
+
     return () => {
-      if (db) {
-        try { db.ref(ORDERS_REF).off("value"); } catch (e) {}
+      const dbInstance = _getDb();
+      if (dbInstance) {
+        try { dbInstance.ref(ORDERS_REF).off("value"); } catch (e) {}
+      }
+    };
+  }
+
+  /* ── Live Single Order Subscription (Customer Order Tracking) ───────── */
+  static subscribeToSingleOrder(orderId, callback) {
+    if (!orderId) return () => {};
+
+    const cached = OrdersAPI.getOrders().find(o => o.id === orderId);
+    if (cached && typeof callback === "function") callback(cached);
+
+    const activeDb = _getDb();
+
+    // Channel A: WebSocket
+    if (activeDb) {
+      try {
+        const orderRef = activeDb.ref(`${ORDERS_REF}/${orderId}`);
+        orderRef.on("value", (snap) => {
+          const order = snap.val();
+          if (order && typeof callback === "function") callback(order);
+        });
+      } catch (e) {}
+    }
+
+    // Channel B: REST Fetch
+    fetch(`${FIREBASE_REST_BASE}/orders/${orderId}.json?_t=${Date.now()}`, { cache: 'no-store' })
+      .then(res => res.json())
+      .then(order => {
+        if (order && typeof callback === "function") callback(order);
+      })
+      .catch(() => {});
+
+    return () => {
+      const dbInstance = _getDb();
+      if (dbInstance) {
+        try { dbInstance.ref(`${ORDERS_REF}/${orderId}`).off("value"); } catch (e) {}
       }
     };
   }
@@ -417,19 +509,26 @@ class OrdersAPI {
       ...orderRecord
     };
 
-    // 1. Update local storage immediately
     const existing = OrdersAPI.getOrders();
     existing.unshift(fullOrder);
     OrdersAPI._cacheOrders(existing);
 
-    // 2. Sync to Firebase
-    if (db) {
+    // Channel A: WebSocket
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(`${ORDERS_REF}/${fullOrder.id}`).set(fullOrder);
-      } catch (e) {
-        console.warn("[Unified Vogue] Firebase order write notice:", e.message);
-      }
+        await activeDb.ref(`${ORDERS_REF}/${fullOrder.id}`).set(fullOrder);
+      } catch (e) {}
     }
+
+    // Channel B: REST PUT
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/orders/${fullOrder.id}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fullOrder)
+      });
+    } catch (e) {}
 
     return fullOrder;
   }
@@ -443,11 +542,20 @@ class OrdersAPI {
       OrdersAPI._cacheOrders(orders);
     }
 
-    if (db) {
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(`${ORDERS_REF}/${orderId}`).update({ status: newStatus });
+        await activeDb.ref(`${ORDERS_REF}/${orderId}`).update({ status: newStatus });
       } catch (e) {}
     }
+
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/orders/${orderId}/status.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStatus)
+      });
+    } catch (e) {}
 
     return orders;
   }
@@ -458,11 +566,16 @@ class OrdersAPI {
     orders = orders.filter(o => o.id !== orderId);
     OrdersAPI._cacheOrders(orders);
 
-    if (db) {
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(`${ORDERS_REF}/${orderId}`).remove();
+        await activeDb.ref(`${ORDERS_REF}/${orderId}`).remove();
       } catch (e) {}
     }
+
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/orders/${orderId}.json`, { method: 'DELETE' });
+    } catch (e) {}
 
     return orders;
   }
@@ -471,46 +584,18 @@ class OrdersAPI {
   static async clearAllOrders() {
     OrdersAPI._cacheOrders([]);
 
-    if (db) {
+    const activeDb = _getDb();
+    if (activeDb) {
       try {
-        await db.ref(ORDERS_REF).remove();
+        await activeDb.ref(ORDERS_REF).remove();
       } catch (e) {}
     }
 
-  /* ── Live Single Order Subscription (Customer Order Tracking) ───────── */
-  static subscribeToSingleOrder(orderId, callback) {
-    if (!orderId) return () => {};
+    try {
+      await fetch(`${FIREBASE_REST_BASE}/orders.json`, { method: 'DELETE' });
+    } catch (e) {}
 
-    // 1. Initial check from local storage or cached list
-    const cached = OrdersAPI.getOrders().find(o => o.id === orderId);
-    if (cached) callback(cached);
-
-    // 2. Real-time Firebase listener
-    if (db) {
-      try {
-        const orderRef = db.ref(`${ORDERS_REF}/${orderId}`);
-        orderRef.on("value", (snap) => {
-          const order = snap.val();
-          if (order) {
-            callback(order);
-          }
-        });
-      } catch (e) {}
-    }
-
-    // 3. Fallback direct REST fetch
-    fetch(`https://unifiedvogue-b8a97-default-rtdb.firebaseio.com/orders/${orderId}.json?_t=${Date.now()}`)
-      .then(res => res.json())
-      .then(order => {
-        if (order) callback(order);
-      })
-      .catch(() => {});
-
-    return () => {
-      if (db) {
-        try { db.ref(`${ORDERS_REF}/${orderId}`).off("value"); } catch (e) {}
-      }
-    };
+    return [];
   }
 }
 
