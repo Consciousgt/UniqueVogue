@@ -109,13 +109,13 @@
   <div class="pin-overlay" id="pinOverlay">
     <div class="pin-box">
       <i class="fa-solid fa-crown" style="font-size:2.4rem; color:var(--gold); margin-bottom:12px;"></i>
-      <h2 class="serif" style="margin-bottom:6px;">Owner Dashboard</h2>
-      <p style="font-size:0.85rem; color:var(--grey);">Enter your 4-digit PIN to access store settings</p>
-      <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" autofocus />
-      <button class="btn btn-gold btn-full" onclick="checkOwnerPin()">
+      <h2 class="serif" style="margin-bottom:6px; color:var(--gold-light);">Owner Command Portal</h2>
+      <p style="font-size:0.85rem; color:var(--grey); margin-bottom:16px;">Enter your 4-digit PIN to manage catalog &amp; orders</p>
+      <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="1234" value="1234" autofocus />
+      <button class="btn btn-gold btn-full" onclick="checkOwnerPin()" style="font-size:0.95rem; padding:13px;">
         <i class="fa-solid fa-lock-open"></i> Unlock Dashboard
       </button>
-      <p style="font-size:0.72rem; color:var(--grey-dim); margin-top:14px;">Default PIN: <strong>1234</strong></p>
+      <p style="font-size:0.75rem; color:var(--grey-dim); margin-top:14px;">Store Owner Access PIN: <strong style="color:var(--gold);">1234</strong></p>
     </div>
   </div>
 
@@ -421,6 +421,12 @@
       if (toggle && links) {
         toggle.addEventListener('click', () => links.classList.add('open'));
         if (close) close.addEventListener('click', () => links.classList.remove('open'));
+      }
+    });
+
+    window.addEventListener('load', () => {
+      if (typeof AdminManager !== "undefined") {
+        AdminManager.initAdminDashboard();
       }
     });
 
