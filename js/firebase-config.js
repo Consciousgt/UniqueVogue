@@ -477,7 +477,40 @@ class OrdersAPI {
       } catch (e) {}
     }
 
-    return [];
+  /* ── Live Single Order Subscription (Customer Order Tracking) ───────── */
+  static subscribeToSingleOrder(orderId, callback) {
+    if (!orderId) return () => {};
+
+    // 1. Initial check from local storage or cached list
+    const cached = OrdersAPI.getOrders().find(o => o.id === orderId);
+    if (cached) callback(cached);
+
+    // 2. Real-time Firebase listener
+    if (db) {
+      try {
+        const orderRef = db.ref(`${ORDERS_REF}/${orderId}`);
+        orderRef.on("value", (snap) => {
+          const order = snap.val();
+          if (order) {
+            callback(order);
+          }
+        });
+      } catch (e) {}
+    }
+
+    // 3. Fallback direct REST fetch
+    fetch(`https://unifiedvogue-b8a97-default-rtdb.firebaseio.com/orders/${orderId}.json?_t=${Date.now()}`)
+      .then(res => res.json())
+      .then(order => {
+        if (order) callback(order);
+      })
+      .catch(() => {});
+
+    return () => {
+      if (db) {
+        try { db.ref(`${ORDERS_REF}/${orderId}`).off("value"); } catch (e) {}
+      }
+    };
   }
 }
 

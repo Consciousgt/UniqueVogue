@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Order Confirmed — Unified Vogue</title>
+  <title>Live Order Tracking — Unified Vogue</title>
+  <meta name="description" content="Track your Haute Couture order status in real-time from Unified Vogue." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,81 +24,274 @@
           <span class="nav-brand-tag">Your Outfits Speaks Fashion</span>
         </div>
       </a>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a href="shop.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-bag-shopping"></i> Continue Shopping</a>
+      </div>
     </div>
   </nav>
 
-  <div class="success-page">
-    <div class="success-card">
+  <div class="success-page" style="padding: 40px 16px 80px;">
+    <div class="success-card" style="max-width:680px; width:100%;">
+      
+      <!-- Lookup / Search Form -->
+      <div style="margin-bottom:20px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--r-md); padding:12px 16px; display:flex; gap:8px; align-items:center;">
+        <i class="fa-solid fa-magnifying-glass" style="color:var(--gold);"></i>
+        <input type="text" id="trackInput" placeholder="Enter Order Ref (e.g. UV-894021-PAY)" style="background:transparent; border:none; color:var(--white); font-size:0.88rem; flex:1; outline:none; font-family:monospace;" />
+        <button class="btn btn-gold btn-sm" onclick="trackNewRef()" style="padding:6px 14px; font-size:0.78rem;">Track</button>
+      </div>
+
       <div class="success-icon" id="successIcon">
         <i class="fa-solid fa-check"></i>
       </div>
 
-      <h1 class="serif" id="successHeading">Order Initiated!</h1>
-      <p>Thank you for shopping with <strong>Unified Vogue</strong>.</p>
-      <p>Your order reference code is:</p>
+      <h1 class="serif" id="successHeading" style="font-size:1.8rem; margin-bottom:6px;">Order Live Tracker</h1>
+      <p style="color:var(--grey); font-size:0.88rem; margin-bottom:12px;">Order Reference Code:</p>
       <div class="ref-code" id="refDisplay">UV-XXXXXX-PAY</div>
 
-      <div id="orderStatusBadge" style="margin-bottom:14px;"></div>
+      <!-- Real-time Live Status Badge -->
+      <div id="orderStatusBadge" style="margin-bottom:20px;">
+        <span class="badge" style="background:rgba(243,156,18,0.15); border:1px solid rgba(243,156,18,0.4); color:#f39c12; font-size:0.85rem; padding:6px 16px;">
+          <i class="fa-solid fa-circle-dot fa-fade"></i> Connecting to Live Order Tracker...
+        </span>
+      </div>
 
-      <div class="steps-box" id="stepsBox">
-        <h4>What to do next:</h4>
-        <div class="step">
-          <span class="step-num">1</span>
-          <span class="step-text">Make your bank transfer payment into Opay Account: <strong>6584992459</strong> (CHIOMA PEACE OKAFOR).</span>
+      <!-- 5-Stage Live Visual Progress Tracker -->
+      <div class="order-tracker-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--gold); font-weight:700;">
+            <i class="fa-solid fa-satellite-dish fa-beat-fade"></i> Live Dispatch Timeline
+          </div>
+          <div id="liveUpdatedTime" style="font-size:0.72rem; color:var(--grey-dim);">
+            Real-time synchronization active
+          </div>
         </div>
-        <div class="step">
-          <span class="step-num">2</span>
-          <span class="step-text">Click the WhatsApp button below to send your payment receipt & order details to Angela.</span>
+
+        <div class="order-timeline">
+          <div class="timeline-progress-bar" id="timelineBar" style="width: 0%;"></div>
+
+          <div class="timeline-step" id="step1">
+            <div class="step-node"><i class="fa-solid fa-receipt"></i></div>
+            <div class="step-lbl">Order Placed</div>
+          </div>
+
+          <div class="timeline-step" id="step2">
+            <div class="step-node"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="step-lbl">Payment Confirmed</div>
+          </div>
+
+          <div class="timeline-step" id="step3">
+            <div class="step-node"><i class="fa-solid fa-box-open"></i></div>
+            <div class="step-lbl">Packaging &amp; Prep</div>
+          </div>
+
+          <div class="timeline-step" id="step4">
+            <div class="step-node"><i class="fa-solid fa-truck-fast"></i></div>
+            <div class="step-lbl">Dispatched</div>
+          </div>
+
+          <div class="timeline-step" id="step5">
+            <div class="step-node"><i class="fa-solid fa-house-chimney"></i></div>
+            <div class="step-lbl">Delivered</div>
+          </div>
         </div>
-        <div class="step">
-          <span class="step-num">3</span>
-          <span class="step-text">We will verify payment and confirm delivery & dispatch details with you on WhatsApp!</span>
+
+        <div id="statusNotice" style="background:rgba(255,255,255,0.03); border-radius:var(--r-sm); padding:12px 14px; font-size:0.82rem; color:var(--grey-light); line-height:1.5; margin-top:14px; border-left:3px solid var(--gold);">
+          Your order has been initiated. Complete payment to Opay (6584992459 - CHIOMA PEACE OKAFOR) and send your receipt on WhatsApp below.
         </div>
       </div>
 
-      <a href="#" id="waBtn" class="wa-cta" target="_blank">
+      <!-- Order Summary Card -->
+      <div id="orderItemsSummary" style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-bottom:20px; text-align:left; display:none;">
+        <h4 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:var(--gold-light); margin-bottom:10px;">
+          <i class="fa-solid fa-bag-shopping"></i> Order Items Summary
+        </h4>
+        <div id="orderItemsList" style="font-size:0.84rem; color:var(--grey); margin-bottom:10px;"></div>
+        <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:8px; font-size:0.92rem; font-weight:700;">
+          <span>Total Paid:</span>
+          <span id="orderTotalPaid" style="color:var(--gold-light);">₦0</span>
+        </div>
+      </div>
+
+      <!-- Payment & WhatsApp Action Box -->
+      <div class="steps-box" id="paymentStepsBox">
+        <h4 style="font-size:0.88rem;"><i class="fa-solid fa-credit-card" style="color:var(--gold);"></i> Payment Verification Details:</h4>
+        <div class="step">
+          <span class="step-num">1</span>
+          <span class="step-text">Bank: <strong>Opay</strong> · Account: <strong>6584992459</strong> (Name: <strong>CHIOMA PEACE OKAFOR</strong>)</span>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <span class="step-text">Click the WhatsApp button below to submit your payment proof to Angela.</span>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <span class="step-text">The admin will confirm payment and your timeline status above will automatically turn green!</span>
+        </div>
+      </div>
+
+      <a href="#" id="waBtn" class="wa-cta" target="_blank" style="margin-bottom:10px;">
         <i class="fa-brands fa-whatsapp"></i>
         Send Payment Receipt on WhatsApp
       </a>
 
-      <button id="cancelOrderBtn" class="btn btn-outline btn-full" onclick="cancelCustomerOrder()" style="border-color:rgba(230,57,70,0.4); color:#e63946; margin-bottom:8px;">
+      <button id="cancelOrderBtn" class="btn btn-outline btn-full" onclick="cancelCustomerOrder()" style="border-color:rgba(230,57,70,0.4); color:#e63946; margin-bottom:10px;">
         <i class="fa-solid fa-ban"></i> Cancel This Order
       </button>
 
-      <a href="index.html" class="btn btn-outline btn-full">
-        <i class="fa-solid fa-house"></i> Return to Main Store
+      <a href="shop.html" class="btn btn-outline btn-full">
+        <i class="fa-solid fa-bag-shopping"></i> Return to Shop
       </a>
     </div>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
   <script src="js/app.js"></script>
+  <script src="js/firebase-config.js"></script>
+
   <script>
     let currentRef = '';
+    let unsubscribeOrder = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       currentRef = urlParams.get('ref') || 'UV-894021-PAY';
-      const waUrl = urlParams.get('wa') || `https://wa.me/2349126284759`;
+      const waUrl = urlParams.get('wa') || `https://wa.me/2349126284759?text=${encodeURIComponent('Hello Unified Vogue, I am checking on order ' + currentRef)}`;
 
       document.getElementById('refDisplay').textContent = currentRef;
+      document.getElementById('trackInput').value = currentRef;
       document.getElementById('waBtn').setAttribute('href', decodeURIComponent(waUrl));
 
-      checkStatus(currentRef);
+      startLiveTracking(currentRef);
     });
 
-    function checkStatus(ref) {
-      const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
-      const order = orders.find(o => o.id === ref);
+    function trackNewRef() {
+      const input = document.getElementById('trackInput').value.trim().toUpperCase();
+      if (!input) return;
+      currentRef = input;
+      document.getElementById('refDisplay').textContent = currentRef;
+      window.history.replaceState(null, '', `success.html?ref=${currentRef}`);
+      startLiveTracking(currentRef);
+    }
+
+    function startLiveTracking(ref) {
+      if (unsubscribeOrder) unsubscribeOrder();
+
+      if (typeof OrdersAPI !== "undefined") {
+        unsubscribeOrder = OrdersAPI.subscribeToSingleOrder(ref, (order) => {
+          updateTrackingUI(order);
+        });
+      }
+    }
+
+    function updateTrackingUI(order) {
       const badgeEl = document.getElementById('orderStatusBadge');
       const cancelBtn = document.getElementById('cancelOrderBtn');
+      const noticeEl = document.getElementById('statusNotice');
+      const iconEl = document.getElementById('successIcon');
+      const headingEl = document.getElementById('successHeading');
+      const liveTimeEl = document.getElementById('liveUpdatedTime');
 
-      if (order && (order.status === 'Cancelled by Customer' || order.status === 'Cancelled / Failed')) {
-        badgeEl.innerHTML = `<span class="badge" style="background:#e63946; color:#fff; font-size:0.8rem;">Status: Cancelled by Customer</span>`;
+      const s1 = document.getElementById('step1');
+      const s2 = document.getElementById('step2');
+      const s3 = document.getElementById('step3');
+      const s4 = document.getElementById('step4');
+      const s5 = document.getElementById('step5');
+      const bar = document.getElementById('timelineBar');
+
+      // Reset step classes
+      [s1, s2, s3, s4, s5].forEach(s => {
+        s.className = 'timeline-step';
+      });
+
+      const status = (order && order.status) ? order.status : 'Payment Pending Confirmation';
+      const isCancelled = status === 'Cancelled by Customer' || status === 'Cancelled / Failed';
+
+      liveTimeEl.textContent = `Status updated live: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+      if (isCancelled) {
+        badgeEl.innerHTML = `<span class="badge" style="background:#e63946; color:#fff; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-ban"></i> Order Cancelled</span>`;
         if (cancelBtn) cancelBtn.style.display = 'none';
-        document.getElementById('successHeading').textContent = 'Order Cancelled';
-        document.getElementById('successIcon').style.background = 'rgba(230,57,70,0.1)';
-        document.getElementById('successIcon').style.borderColor = '#e63946';
-        document.getElementById('successIcon').innerHTML = `<i class="fa-solid fa-xmark" style="color:#e63946;"></i>`;
+        headingEl.textContent = 'Order Cancelled';
+        iconEl.style.background = 'rgba(230,57,70,0.15)';
+        iconEl.style.borderColor = '#e63946';
+        iconEl.innerHTML = `<i class="fa-solid fa-xmark" style="color:#e63946;"></i>`;
+        noticeEl.style.borderLeftColor = '#e63946';
+        noticeEl.innerHTML = `⚠️ This order is marked as <strong>Cancelled</strong>. If this was a mistake, please reach out to Unified Vogue support on WhatsApp.`;
+        s1.classList.add('cancelled');
+        bar.style.width = '0%';
+      } else if (status === 'Delivered') {
+        badgeEl.innerHTML = `<span class="badge" style="background:#2ec4b6; color:#fff; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-circle-check"></i> Delivered Successfully</span>`;
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        headingEl.textContent = 'Package Delivered!';
+        iconEl.style.background = 'rgba(46,196,182,0.15)';
+        iconEl.style.borderColor = '#2ec4b6';
+        iconEl.innerHTML = `<i class="fa-solid fa-check-double" style="color:#2ec4b6;"></i>`;
+        noticeEl.style.borderLeftColor = '#2ec4b6';
+        noticeEl.innerHTML = `🎉 Your order has been delivered! Thank you for dressing with <strong>Unified Vogue Haute Couture</strong>.`;
+        s1.classList.add('completed');
+        s2.classList.add('completed');
+        s3.classList.add('completed');
+        s4.classList.add('completed');
+        s5.classList.add('completed');
+        bar.style.width = '100%';
+      } else if (status === 'Dispatched' || status.includes('Dispatched')) {
+        badgeEl.innerHTML = `<span class="badge" style="background:#25D366; color:#fff; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-truck-fast"></i> Dispatched / In Transit</span>`;
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        headingEl.textContent = 'Order On The Way!';
+        iconEl.style.background = 'rgba(37,211,102,0.15)';
+        iconEl.style.borderColor = '#25D366';
+        iconEl.innerHTML = `<i class="fa-solid fa-truck-ramp-box" style="color:#25D366;"></i>`;
+        noticeEl.style.borderLeftColor = '#25D366';
+        noticeEl.innerHTML = `🚀 Your package has been dispatched by Unified Vogue! The courier / rider is en route to your delivery address.`;
+        s1.classList.add('completed');
+        s2.classList.add('completed');
+        s3.classList.add('completed');
+        s4.classList.add('active');
+        bar.style.width = '75%';
+      } else if (status.includes('Processing') || status.includes('Packaging')) {
+        badgeEl.innerHTML = `<span class="badge" style="background:#3a86ff; color:#fff; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-boxes-packing"></i> Processing & Packaging</span>`;
+        headingEl.textContent = 'Preparing Your Outfits';
+        noticeEl.style.borderLeftColor = '#3a86ff';
+        noticeEl.innerHTML = `📦 Your payment is confirmed and our bespoke atelier is tailoring and packaging your luxury pieces for dispatch.`;
+        s1.classList.add('completed');
+        s2.classList.add('completed');
+        s3.classList.add('active');
+        bar.style.width = '50%';
+      } else if (status === 'Payment Confirmed') {
+        badgeEl.innerHTML = `<span class="badge" style="background:var(--gold-grad); color:#000; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-circle-check"></i> Payment Confirmed</span>`;
+        headingEl.textContent = 'Payment Confirmed!';
+        noticeEl.style.borderLeftColor = 'var(--gold)';
+        noticeEl.innerHTML = `✨ Chioma Peace Okafor has confirmed your bank transfer payment! Your order is entering our dispatch queue.`;
+        s1.classList.add('completed');
+        s2.classList.add('active');
+        bar.style.width = '25%';
+      } else {
+        // Pending
+        badgeEl.innerHTML = `<span class="badge" style="background:rgba(243,156,18,0.15); border:1px solid rgba(243,156,18,0.4); color:#f39c12; font-size:0.85rem; padding:6px 16px;"><i class="fa-solid fa-clock"></i> Payment Pending Confirmation</span>`;
+        s1.classList.add('active');
+        bar.style.width = '5%';
+        noticeEl.style.borderLeftColor = '#f39c12';
+        noticeEl.innerHTML = `Please transfer payment into Opay (6584992459 - CHIOMA PEACE OKAFOR) and click below to send receipt on WhatsApp.`;
+      }
+
+      // Render Order Items Summary if available
+      if (order && order.items && order.items.length > 0) {
+        const itemsBox = document.getElementById('orderItemsSummary');
+        const list = document.getElementById('orderItemsList');
+        const totalEl = document.getElementById('orderTotalPaid');
+        itemsBox.style.display = 'block';
+
+        list.innerHTML = order.items.map(item => `
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>• ${item.name} (${item.size}) x${item.qty}</span>
+            <span style="font-weight:600; color:var(--white);">${App.formatMoney(item.price * item.qty)}</span>
+          </div>
+        `).join('');
+
+        totalEl.textContent = App.formatMoney(order.total || 0);
       }
     }
 
@@ -105,18 +299,9 @@
       if (!currentRef) return;
 
       if (confirm(`Are you sure you want to cancel order ${currentRef}?`)) {
-        let orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
-        const idx = orders.findIndex(o => o.id === currentRef);
-        if (idx !== -1) {
-          orders[idx].status = 'Cancelled by Customer';
-          localStorage.setItem("uv_orders_history", JSON.stringify(orders));
-        } else {
-          // If not in local history, create a cancelled record
-          orders.unshift({ id: currentRef, date: 'Today', status: 'Cancelled by Customer', total: 0 });
-          localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+        if (typeof OrdersAPI !== "undefined") {
+          OrdersAPI.updateOrderStatus(currentRef, 'Cancelled by Customer');
         }
-
-        checkStatus(currentRef);
         App.showToast(`Order ${currentRef} has been cancelled`);
       }
     }

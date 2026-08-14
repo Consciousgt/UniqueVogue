@@ -651,6 +651,100 @@ textarea.form-ctrl { resize:vertical; min-height:82px; }
   box-shadow: 0 0 0 2px rgba(197,160,89,0.2);
 }
 
+/* ── LIVE CUSTOMER ORDER TRACKER TIMELINE ── */
+.order-tracker-box {
+  background: rgba(18,18,18,0.85);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--r-lg);
+  padding: 24px 20px;
+  margin: 20px 0;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.order-timeline {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 28px 0 20px;
+  padding: 0 6px;
+}
+.order-timeline::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  z-index: 1;
+}
+.timeline-progress-bar {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  height: 3px;
+  background: var(--gold-grad);
+  z-index: 2;
+  transition: width 0.4s ease;
+}
+.timeline-step {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.step-node {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--grey-dim);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 4px var(--bg);
+}
+.timeline-step.completed .step-node {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--black);
+  box-shadow: 0 0 12px rgba(197,160,89,0.5);
+}
+.timeline-step.active .step-node {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+  color: var(--black);
+  animation: trackerPulse 1.8s infinite;
+}
+.timeline-step.cancelled .step-node {
+  background: #e63946;
+  border-color: #e63946;
+  color: #fff;
+}
+@keyframes trackerPulse {
+  0% { box-shadow: 0 0 0 0 rgba(229,195,124,0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(229,195,124,0); }
+  100% { box-shadow: 0 0 0 0 rgba(229,195,124,0); }
+}
+.step-lbl {
+  margin-top: 10px;
+  font-size: 0.72rem;
+  color: var(--grey-dim);
+  font-weight: 600;
+  max-width: 80px;
+  line-height: 1.3;
+}
+.timeline-step.active .step-lbl,
+.timeline-step.completed .step-lbl {
+  color: var(--white);
+}
+
 /* ── GLOBAL OVERFLOW GUARD ── */
 html, body {
   overflow-x: hidden;
