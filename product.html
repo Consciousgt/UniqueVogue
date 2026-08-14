@@ -171,7 +171,7 @@
     let selectedQty  = 1;
     let currentProduct = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function renderProductDetail() {
       const urlParams = new URLSearchParams(window.location.search);
       const prodId    = urlParams.get('id') || 'uv-1';
       const initialSize = urlParams.get('size');
@@ -184,7 +184,7 @@
           <div style="grid-column:1/-1; text-align:center; padding:80px 20px;">
             <i class="fa-solid fa-box-open" style="font-size:3rem; color:var(--border-gold); display:block; margin-bottom:14px;"></i>
             <h2 class="serif" style="margin-bottom:8px;">Product Not Found</h2>
-            <p style="color:var(--grey); margin-bottom:20px;">This item is currently unavailable.</p>
+            <p style="color:var(--grey); margin-bottom:20px;">This item is currently unavailable or still syncing.</p>
             <a href="shop.html" class="btn btn-gold">Return to Shop</a>
           </div>`;
         return;
@@ -278,6 +278,14 @@
           </div>
         </div>
       `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProductDetail();
+
+      window.addEventListener('uv_catalog_synced', () => {
+        renderProductDetail();
+      });
 
       // Mobile nav
       const toggle = document.getElementById('navToggle');

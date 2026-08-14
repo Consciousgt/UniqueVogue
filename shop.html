@@ -194,6 +194,11 @@
         if (close) close.addEventListener('click', () => links.classList.remove('open'));
       }
 
+      // Listen for background cloud sync updates
+      window.addEventListener('uv_catalog_synced', () => {
+        renderProducts();
+      });
+
       renderProducts();
     });
   </script>

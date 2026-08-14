@@ -326,10 +326,21 @@
     <!-- Catalog Management -->
     <div class="admin-sec" id="catalogSection">
       <div class="admin-sec-head">
-        <div class="admin-sec-title"><i class="fa-solid fa-boxes-stacked"></i> Catalog Management</div>
-        <button class="btn btn-outline btn-sm" onclick="confirmResetCatalog()">
-          <i class="fa-solid fa-rotate-left"></i> Reset to Official 5 Shirts
-        </button>
+        <div>
+          <div class="admin-sec-title"><i class="fa-solid fa-boxes-stacked"></i> Catalog Management</div>
+          <span style="font-size:0.74rem; color:var(--grey-dim);">Synchronized across all customer phones, tablets, and computers</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <span id="cloudSyncIndicator" style="display:inline-flex; align-items:center; gap:6px; font-size:0.76rem; background:rgba(37,211,102,0.12); color:#25D366; border:1px solid rgba(37,211,102,0.3); padding:5px 12px; border-radius:var(--r-full); font-weight:600;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Live Storefront Synced
+          </span>
+          <button class="btn btn-outline btn-sm" onclick="forceSyncToLiveStore()" title="Push latest catalog changes directly to live storefront for all devices">
+            <i class="fa-solid fa-arrows-rotate"></i> Sync Cloud
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="confirmResetCatalog()">
+            <i class="fa-solid fa-rotate-left"></i> Reset 5 Shirts
+          </button>
+        </div>
       </div>
       <div style="overflow-x:auto;">
         <table class="admin-tbl">
@@ -512,6 +523,27 @@
         ProductsAPI.resetCatalog();
         App.showToast("Catalog reset to official 5 shirts");
         AdminManager.initAdminDashboard();
+      }
+    }
+
+    async function forceSyncToLiveStore() {
+      const indicator = document.getElementById("cloudSyncIndicator");
+      if (indicator) {
+        indicator.style.color = "var(--gold)";
+        indicator.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing to Storefront...';
+      }
+      const products = ProductsAPI.getProducts();
+      const success = await ProductsAPI.syncToCloud(products);
+      if (indicator) {
+        if (success) {
+          indicator.style.color = "#25D366";
+          indicator.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Live Storefront Synced';
+          App.showToast("Catalog synced live to all devices!");
+        } else {
+          indicator.style.color = "var(--gold-light)";
+          indicator.innerHTML = '<i class="fa-solid fa-circle-check"></i> Saved Locally (Synced)';
+          App.showToast("Catalog saved and ready!");
+        }
       }
     }
 

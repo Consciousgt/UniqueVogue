@@ -213,15 +213,16 @@
   <script src="js/cart.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    function renderHomeProducts() {
       const grid = document.getElementById("homeProductsGrid");
+      if (!grid) return;
       const products = ProductsAPI.getProducts();
 
       grid.innerHTML = products.map(p => `
         <div class="prod-card">
           <div class="prod-thumb">
             <span class="badge">${p.badge || 'New'}</span>
-            <img src="${p.image}" alt="${p.name}" loading="lazy" />
+            <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='images/logo.jpg'" />
           </div>
           <div class="prod-body">
             <span class="prod-cat">${p.category}</span>
@@ -236,6 +237,15 @@
           </div>
         </div>
       `).join('');
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderHomeProducts();
+
+      // Listen for background cloud sync updates
+      window.addEventListener('uv_catalog_synced', () => {
+        renderHomeProducts();
+      });
 
       const toggle = document.getElementById('navToggle');
       const links = document.getElementById('navLinks');
