@@ -3,10 +3,20 @@
    ========================================================================== */
 
 class AdminManager {
+  static _unsubscribe = null;
+
   static initAdminDashboard() {
     this.renderMetrics();
     this.renderProductsTable();
     this.renderOrdersTable();
+
+    // Subscribe to Firebase so admin table refreshes automatically when any device makes a change
+    if (!this._unsubscribe) {
+      this._unsubscribe = ProductsAPI.subscribeToLiveCatalog(() => {
+        this.renderMetrics();
+        this.renderProductsTable();
+      });
+    }
   }
 
   static renderMetrics() {
