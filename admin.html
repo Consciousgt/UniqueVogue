@@ -434,8 +434,8 @@
       reader.readAsDataURL(file);
     }
 
-    /* ── Upload New Product With 3-Second Success Tick Popup ── */
-    function handleAdminUpload(e) {
+    /* ── Upload New Product With 3-Second Success Tick Popup & Cloud Sync ── */
+    async function handleAdminUpload(e) {
       e.preventDefault();
       const title    = document.getElementById("pTitle").value.trim();
       const category = document.getElementById("pCategory").value;
@@ -448,8 +448,8 @@
       const sizes    = sizesRaw ? sizesRaw.split(",").map(s => s.trim()).filter(Boolean) : ["S","M","L","XL","2XL"];
       const imageSrc = adminBase64Image || urlInput || "images/shirt-black-knit.jpg";
 
-      // 1. Add product to permanent database
-      ProductsAPI.addProduct({
+      // 1. Add product to cloud and local database
+      await ProductsAPI.addProduct({
         name: title,
         category,
         price,
@@ -469,7 +469,7 @@
       adminBase64Image = "";
 
       // 3. Trigger 3-Second Animated Success Tick Modal
-      showSuccessTick(`"${title}" has been published and is now live with the permanent size chart!`);
+      showSuccessTick(`"${title}" has been published and is now live across all devices!`);
 
       // 4. Re-render Dashboard
       AdminManager.initAdminDashboard();

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   UNIFIED VOGUE — UNIVERSAL CROSS-DEVICE CATALOG ENGINE
+   UNIFIED VOGUE — MULTI-DEVICE CLOUD CATALOG ENGINE
    ========================================================================== */
 
 const OFFICIAL_SIZE_CHART = {
@@ -81,19 +81,8 @@ const OFFICIAL_CATALOG = [
   }
 ];
 
-const DB_KEY = "uv_vogue_catalog_v9";
-const GITHUB_REPO = "Consciousgt/UniqueVogue";
-const GITHUB_FILE = "data/products.json";
-
-// Secure token resolver for repository cloud synchronization
-function getSyncAuthKey() {
-  const chunks = ["Z2hwX2NFNUxBZn", "NyNHlES2hVb084S0", "Z6M1hqa2RUdWk5ST", "FWQWZMQ=="];
-  try {
-    return atob(chunks.join(''));
-  } catch (e) {
-    return "";
-  }
-}
+const DB_KEY = "uv_vogue_catalog_v10";
+const CLOUD_BIN_URL = "https://extendsclass.com/api/json-storage/bin/acfdddb";
 
 class ProductsAPI {
   static getPermanentSizeChart() {
@@ -173,18 +162,19 @@ class ProductsAPI {
     return OFFICIAL_CATALOG;
   }
 
-  /* ── Universal Cross-Device Cloud Sync ── */
+  /* ── Universal Multi-Device Cloud Sync ── */
   static async fetchRemoteCatalog() {
     const urls = [
-      `data/products.json?_t=${Date.now()}`,
-      `https://raw.githubusercontent.com/${GITHUB_REPO}/main/${GITHUB_FILE}?_t=${Date.now()}`
+      `${CLOUD_BIN_URL}?_t=${Date.now()}`,
+      `data/products.json?_t=${Date.now()}`
     ];
 
     for (const url of urls) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
         if (res.ok) {
-          const remoteProducts = await res.json();
+          const raw = await res.json();
+          const remoteProducts = Array.isArray(raw) ? raw : (raw.data ? (typeof raw.data === 'string' ? JSON.parse(raw.data) : raw.data) : null);
           if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
             const standardized = remoteProducts.map(p => ({
               ...p,
@@ -195,50 +185,24 @@ class ProductsAPI {
             return standardized;
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        // Fallback to next endpoint
+      }
     }
     return this.getProducts();
   }
 
   static async syncToCloud(products) {
-    const token = getSyncAuthKey();
-    if (!token) return false;
-
     try {
-      // 1. Get existing file SHA from GitHub Contents API
-      let sha = null;
-      const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
-        headers: {
-          'Authorization': `token ${token}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-
-      if (getRes.ok) {
-        const data = await getRes.json();
-        sha = data.sha;
-      }
-
-      // 2. Base64 encode the new JSON content
-      const jsonStr = JSON.stringify(products, null, 2);
-      const encodedContent = btoa(unescape(encodeURIComponent(jsonStr)));
-
-      // 3. Commit new version to GitHub repository
-      const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
+      const res = await fetch(CLOUD_BIN_URL, {
         method: 'PUT',
         headers: {
-          'Authorization': `token ${token}`,
-          'Accept': 'application/vnd.github.v3+json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          message: `Update product catalog via Admin Portal [skip ci]`,
-          content: encodedContent,
-          sha: sha || undefined
-        })
+        body: JSON.stringify(products)
       });
 
-      if (putRes.ok) {
+      if (res.ok) {
         localStorage.setItem('uv_last_cloud_sync', new Date().toISOString());
         window.dispatchEvent(new CustomEvent('uv_cloud_sync_success'));
         return true;

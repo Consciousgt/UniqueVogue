@@ -192,15 +192,15 @@ class AdminManager {
       return;
     }
 
-    ProductsAPI.updateProduct(id, { price: priceNum, stock: stockNum });
-    App.showToast(`Updated "${prod.name}" successfully!`);
+    await ProductsAPI.updateProduct(id, { price: priceNum, stock: stockNum });
+    App.showToast(`Updated "${prod.name}" across all devices!`);
     this.initAdminDashboard();
   }
 
-  static deleteProd(id) {
+  static async deleteProd(id) {
     if (confirm("Are you sure you want to remove this product from the store catalog?")) {
-      ProductsAPI.deleteProduct(id);
-      App.showToast("Product removed from catalog");
+      await ProductsAPI.deleteProduct(id);
+      App.showToast("Product removed from catalog across all devices");
       this.initAdminDashboard();
     }
   }
