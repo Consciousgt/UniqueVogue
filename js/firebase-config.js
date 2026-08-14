@@ -30,8 +30,8 @@ try {
 
 const CATALOG_REF = "catalog";
 const DELETED_REF = "deleted_ids";
-const DB_KEY = "uv_vogue_catalog_v12";
-const DELETED_KEY = "uv_vogue_deleted_v12";
+const DB_KEY = "uv_vogue_catalog_v14";
+const DELETED_KEY = "uv_vogue_deleted_v14";
 const CLOUD_BIN_URL = "https://extendsclass.com/api/json-storage/bin/acfdddb";
 
 /* ── Permanent Official Standard Size Chart (Inches) ─────────────────────── */
@@ -156,8 +156,11 @@ function _filterDeleted(products) {
 function _snapshotToArray(data) {
   if (!data || typeof data !== "object") return [];
   const items = Object.values(data).map(_attachSizeChart);
-  return _filterDeleted(items).sort((a, b) => {
-    // New items (timestamp ids) appear first
+  const filtered = _filterDeleted(items);
+  if (filtered.length === 0) {
+    return OFFICIAL_CATALOG.map(_attachSizeChart);
+  }
+  return filtered.sort((a, b) => {
     const aNew = a.id && a.id.length > 6;
     const bNew = b.id && b.id.length > 6;
     if (aNew && !bNew) return -1;
@@ -169,7 +172,9 @@ function _snapshotToArray(data) {
 
 function _cacheProducts(products) {
   const filtered = _filterDeleted(products);
-  localStorage.setItem(DB_KEY, JSON.stringify(filtered));
+  if (filtered.length > 0) {
+    localStorage.setItem(DB_KEY, JSON.stringify(filtered));
+  }
 }
 
 async function _pushToCloudBin(products) {
@@ -191,21 +196,26 @@ class ProductsAPI {
     return OFFICIAL_SIZE_CHART;
   }
 
-  /* ── Read Products (Instant, synchronous, filters deleted items) ─────── */
+  /* ── Read Products (Guaranteed to return products, instant, filters deleted) ── */
   static getProducts() {
     try {
       const stored = localStorage.getItem(DB_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           const filtered = _filterDeleted(parsed);
-          return filtered.map(_attachSizeChart);
+          if (filtered.length > 0) {
+            return filtered.map(_attachSizeChart);
+          }
         }
       }
     } catch (e) {}
 
     const defaultFiltered = _filterDeleted(OFFICIAL_CATALOG);
-    return defaultFiltered.map(_attachSizeChart);
+    if (defaultFiltered.length > 0) {
+      return defaultFiltered.map(_attachSizeChart);
+    }
+    return OFFICIAL_CATALOG.map(_attachSizeChart);
   }
 
   static getProductById(id) {
@@ -217,8 +227,9 @@ class ProductsAPI {
 
   /* ── Real-Time Live Subscription ─────────────────────────────────────── */
   static subscribeToLiveCatalog(callback) {
-    // 1. Send initial cached data immediately (zero lag)
-    callback(ProductsAPI.getProducts());
+    // 1. Send initial data immediately
+    const initial = ProductsAPI.getProducts();
+    callback(initial);
 
     // 2. Listen to Firebase Realtime Database
     if (db) {
@@ -228,15 +239,21 @@ class ProductsAPI {
           const data = snapshot.val();
           if (data && typeof data === "object" && Object.keys(data).length > 0) {
             const products = _snapshotToArray(data);
-            _cacheProducts(products);
-            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
-            callback(products);
+            if (products.length > 0) {
+              _cacheProducts(products);
+              window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
+              callback(products);
+            }
+          } else {
+            // Seed Firebase if empty
+            ProductsAPI.resetCatalog().then(prods => callback(prods));
           }
         }, (err) => {
-          console.warn("[Unified Vogue] Firebase live stream notice:", err.message);
+          console.warn("[Unified Vogue] Firebase stream notice:", err.message);
+          callback(ProductsAPI.getProducts());
         });
 
-        // Also sync deleted IDs from Firebase
+        // Sync deleted IDs from Firebase
         db.ref(DELETED_REF).on("value", (snap) => {
           const deletedMap = snap.val();
           if (deletedMap && typeof deletedMap === "object") {
@@ -249,16 +266,18 @@ class ProductsAPI {
       } catch (e) {}
     }
 
-    // 3. Background Cloud Storage Bin Sync (High availability fallback)
+    // 3. Background Cloud Storage Bin Sync
     fetch(`${CLOUD_BIN_URL}?_t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(raw => {
         const remoteProducts = Array.isArray(raw) ? raw : (raw && raw.data ? (typeof raw.data === 'string' ? JSON.parse(raw.data) : raw.data) : null);
         if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
           const standardized = _snapshotToArray(remoteProducts);
-          _cacheProducts(standardized);
-          window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
-          callback(standardized);
+          if (standardized.length > 0) {
+            _cacheProducts(standardized);
+            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
+            callback(standardized);
+          }
         }
       })
       .catch(() => {});
@@ -386,9 +405,11 @@ class ProductsAPI {
         const snap = await db.ref(CATALOG_REF).once("value");
         if (snap.exists()) {
           const products = _snapshotToArray(snap.val());
-          _cacheProducts(products);
-          window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
-          return products;
+          if (products.length > 0) {
+            _cacheProducts(products);
+            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
+            return products;
+          }
         }
       } catch (e) {}
     }
@@ -400,9 +421,11 @@ class ProductsAPI {
         const remoteProducts = Array.isArray(raw) ? raw : (raw && raw.data ? (typeof raw.data === 'string' ? JSON.parse(raw.data) : raw.data) : null);
         if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
           const standardized = _snapshotToArray(remoteProducts);
-          _cacheProducts(standardized);
-          window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
-          return standardized;
+          if (standardized.length > 0) {
+            _cacheProducts(standardized);
+            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
+            return standardized;
+          }
         }
       }
     } catch (e) {}

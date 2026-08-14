@@ -10,11 +10,11 @@ class AdminManager {
     this.renderProductsTable();
     this.renderOrdersTable();
 
-    // Subscribe to Firebase so admin table refreshes automatically when any device makes a change
+    // Subscribe to live catalog so admin table refreshes automatically when any device makes a change
     if (!this._unsubscribe) {
-      this._unsubscribe = ProductsAPI.subscribeToLiveCatalog(() => {
+      this._unsubscribe = ProductsAPI.subscribeToLiveCatalog((products) => {
         this.renderMetrics();
-        this.renderProductsTable();
+        this.renderProductsTable(products);
       });
     }
   }
@@ -36,11 +36,11 @@ class AdminManager {
     if (ordersEl)   ordersEl.textContent   = orders.length;
   }
 
-  static renderProductsTable() {
+  static renderProductsTable(productList) {
     const tbody = document.getElementById("adminProductsTbody");
     if (!tbody) return;
 
-    const products = ProductsAPI.getProducts();
+    const products = (Array.isArray(productList) && productList.length > 0) ? productList : ProductsAPI.getProducts();
     if (products.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" class="empty-tbl">No products in catalog. Click "Upload New Product" to add.</td></tr>`;
       return;

@@ -393,14 +393,26 @@
     let successTickTimeout = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      if (sessionStorage.getItem("uv_owner_unlocked") === "true") {
-        document.getElementById("pinOverlay").style.display = "none";
-        AdminManager.initAdminDashboard();
+      // Pre-load dashboard products and metrics immediately
+      AdminManager.initAdminDashboard();
+
+      // Check PIN lock status
+      const isUnlocked = sessionStorage.getItem("uv_owner_unlocked") === "true" || localStorage.getItem("uv_owner_unlocked") === "true";
+      const overlay = document.getElementById("pinOverlay");
+      if (isUnlocked) {
+        if (overlay) overlay.style.display = "none";
+      } else {
+        if (overlay) overlay.style.display = "flex";
+        const pinInp = document.getElementById("pinInput");
+        if (pinInp) setTimeout(() => pinInp.focus(), 150);
       }
 
-      document.getElementById("pinInput").addEventListener("keyup", e => {
-        if (e.key === "Enter") checkOwnerPin();
-      });
+      const pinInp = document.getElementById("pinInput");
+      if (pinInp) {
+        pinInp.addEventListener("keyup", e => {
+          if (e.key === "Enter") checkOwnerPin();
+        });
+      }
 
       // Mobile Nav Drawer Toggle
       const toggle = document.getElementById('navToggle');
@@ -413,14 +425,15 @@
     });
 
     function checkOwnerPin() {
-      const pin = document.getElementById("pinInput").value;
+      const pin = document.getElementById("pinInput").value.trim();
       if (pin === "1234") {
         sessionStorage.setItem("uv_owner_unlocked", "true");
+        localStorage.setItem("uv_owner_unlocked", "true");
         document.getElementById("pinOverlay").style.display = "none";
         AdminManager.initAdminDashboard();
         App.showToast("Welcome to Owner Dashboard!");
       } else {
-        App.showToast("Incorrect PIN. Please try again.", "error");
+        App.showToast("Incorrect PIN (Default: 1234). Please try again.", "error");
         document.getElementById("pinInput").value = "";
       }
     }
