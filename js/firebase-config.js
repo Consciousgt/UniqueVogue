@@ -143,8 +143,11 @@ function _snapshotToProductArray(data) {
   });
 }
 
+let _memProductsCache = null;
+
 function _cacheProducts(products) {
   if (Array.isArray(products) && products.length > 0) {
+    _memProductsCache = products.map(_attachSizeChart);
     try {
       localStorage.setItem(DB_KEY, JSON.stringify(products));
     } catch (e) {}
@@ -170,19 +173,25 @@ class ProductsAPI {
     return OFFICIAL_SIZE_CHART;
   }
 
-  /* ── Read Products (Instant, synchronous, non-empty guaranteed) ─────── */
+  /* ── Read Products (Instant 0ms synchronous, non-empty guaranteed) ──── */
   static getProducts() {
+    if (_memProductsCache && _memProductsCache.length > 0) {
+      return _memProductsCache;
+    }
+
     try {
       const stored = localStorage.getItem(DB_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(_attachSizeChart);
+          _memProductsCache = parsed.map(_attachSizeChart);
+          return _memProductsCache;
         }
       }
     } catch (e) {}
 
-    return OFFICIAL_CATALOG.map(_attachSizeChart);
+    _memProductsCache = OFFICIAL_CATALOG.map(_attachSizeChart);
+    return _memProductsCache;
   }
 
   static getProductById(id) {

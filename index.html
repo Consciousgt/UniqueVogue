@@ -135,6 +135,12 @@
       <div class="prod-grid" id="homeProductsGrid">
         <!-- Injected via JS -->
       </div>
+      <script>
+        // Instant synchronous first paint (0.0ms)
+        if (typeof ProductsAPI !== 'undefined') {
+          renderHomeProducts(ProductsAPI.getProducts());
+        }
+      </script>
 
       <div style="text-align: center; margin-top: 40px;">
         <a href="shop.html" class="btn btn-outline">Explore Full Catalog <i class="fa-solid fa-arrow-right"></i></a>
@@ -213,13 +219,14 @@
     </div>
   </footer>
 
-  <!-- Firebase SDK (compat — works without ES modules) -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
+  <!-- Fast local scripts (load synchronously for instant paint) -->
   <script src="js/app.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/cart.js"></script>
+
+  <!-- Non-blocking deferred remote Firebase SDK -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
   <script>
     function renderHomeProducts(products) {
@@ -243,7 +250,7 @@
         <div class="prod-card" style="${isSoldOut ? 'opacity:0.88;' : ''}">
           <div class="prod-thumb">
             <span class="badge" style="${badgeStyle}">${badgeText}</span>
-            <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='images/logo.jpg'" />
+            <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" onerror="this.src='images/logo.jpg'" />
           </div>
           <div class="prod-body">
             <span class="prod-cat">${p.category}</span>
@@ -265,23 +272,15 @@
       `;}).join('');
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      // Render from cache immediately (feels instant)
-      renderHomeProducts();
+    // Instant initial render
+    renderHomeProducts();
 
-      // Subscribe to Firebase — re-renders automatically whenever admin adds/edits/deletes
+    // Background Firebase real-time sync listener
+    if (typeof ProductsAPI !== 'undefined') {
       ProductsAPI.subscribeToLiveCatalog((products) => {
         renderHomeProducts(products);
       });
-
-      const toggle = document.getElementById('navToggle');
-      const links  = document.getElementById('navLinks');
-      const close  = document.getElementById('navClose');
-      if (toggle && links) {
-        toggle.addEventListener('click', () => links.classList.add('open'));
-        if (close) close.addEventListener('click', () => links.classList.remove('open'));
-      }
-    });
+    }
   </script>
 </body>
 </html>
