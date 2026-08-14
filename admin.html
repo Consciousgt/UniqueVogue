@@ -453,10 +453,38 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (event) => {
-        adminBase64Image = event.target.result;
-        const thumb = document.getElementById("adminPreviewThumb");
-        thumb.src = adminBase64Image;
-        thumb.style.display = "block";
+        const rawData = event.target.result;
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 700;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress down to ~40-60KB high quality web jpeg
+          adminBase64Image = canvas.toDataURL('image/jpeg', 0.80);
+          const thumb = document.getElementById("adminPreviewThumb");
+          thumb.src = adminBase64Image;
+          thumb.style.display = "block";
+        };
+        img.src = rawData;
       };
       reader.readAsDataURL(file);
     }

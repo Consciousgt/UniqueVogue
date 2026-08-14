@@ -56,69 +56,1222 @@ const OFFICIAL_SIZE_CHART = {
 /* ── Official Default Catalog ────────────────────────────────────────────── */
 const OFFICIAL_CATALOG = [
   {
-    id: "uv-1",
-    name: "Knit Shirt — Black",
-    category: "Clothes",
-    price: 15000,
-    image: "images/shirt-black-knit.jpg",
-    badge: "Bestseller",
-    rating: 5.0,
-    stock: 25,
-    sizes: ["S","M","L","XL","2XL"],
-    description: "A luxury all-black open-knit shirt featuring a relaxed Cuban camp collar, tonal button closure, and premium textured finish. Lightweight, breathable, and designed for effortless sophistication.",
-    sizeChart: OFFICIAL_SIZE_CHART
+    "badge": "Bestseller",
+    "category": "Clothes",
+    "description": "A luxury all-black open-knit shirt featuring a relaxed Cuban camp collar, tonal button closure, and premium textured finish. Lightweight, breathable, and designed for effortless sophistication.",
+    "id": "uv-1",
+    "image": "images/shirt-black-knit.jpg",
+    "name": "Knit Shirt \u2014 Black",
+    "price": 12500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 20
   },
   {
-    id: "uv-2",
-    name: "Vintage Shirt — Abstract Gold & Black Print",
-    category: "Clothes",
-    price: 10000,
-    image: "images/shirt-vintage-print.jpg",
-    badge: "New Arrival",
-    rating: 4.9,
-    stock: 20,
-    sizes: ["S","M","L","XL","2XL"],
-    description: "A bold, artistic vintage-style short-sleeve shirt with an eye-catching black, white, and gold brushstroke pattern. Crafted from smooth, lightweight fabric for maximum comfort and style.",
-    sizeChart: OFFICIAL_SIZE_CHART
+    "badge": "New Arrival",
+    "category": "Clothes",
+    "description": "Perfect outfit",
+    "id": "uv-1786727984370",
+    "image": "images/prod-uv-1786727984370.jpg",
+    "name": "Vintage Shirt - UV113",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
   },
   {
-    id: "uv-3",
-    name: "Knit Shirt — Chocolate Brown",
-    category: "Clothes",
-    price: 15000,
-    image: "images/shirt-brown-knit.jpg",
-    badge: "Hot Deal",
-    rating: 5.0,
-    stock: 18,
-    sizes: ["S","M","L","XL","2XL"],
-    description: "Rich chocolate-brown open-knit shirt with classic Cuban lapels and custom pearlized buttons. Warm, elegant, and versatile — a staple piece for high-fashion casual styling.",
-    sizeChart: OFFICIAL_SIZE_CHART
+    "badge": "New Arrival",
+    "category": "Clothes",
+    "description": "Perfect outfit wey dope",
+    "id": "uv-1786728756700",
+    "image": "images/prod-uv-1786728756700.jpg",
+    "name": "Vintage Shirt - UV116",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
   },
   {
-    id: "uv-4",
-    name: "Vintage Shirt — Teal Tribal Swirl",
-    category: "Clothes",
-    price: 10000,
-    image: "images/shirt-teal-print.jpg",
-    badge: "New Arrival",
-    rating: 4.9,
-    stock: 15,
-    sizes: ["S","M","L","XL","2XL"],
-    description: "Vibrant ocean teal and deep black African-inspired swirl pattern shirt. Features a tailored resort fit that makes a powerful fashion statement wherever you go.",
-    sizeChart: OFFICIAL_SIZE_CHART
+    "badge": "New Arrival",
+    "category": "Clothes",
+    "description": "Perfect wear",
+    "id": "uv-1786729797356",
+    "image": "images/prod-uv-1786729797356.jpg",
+    "name": "Vintage Shirt - UV12",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
   },
   {
-    id: "uv-5",
-    name: "Knit Shirt — Warm Beige Stripe",
-    category: "Clothes",
-    price: 15000,
-    image: "images/shirt-beige-knit.jpg",
-    badge: "Featured",
-    rating: 5.0,
-    stock: 22,
-    sizes: ["S","M","L","XL","2XL"],
-    description: "Refined beige open-knit shirt with horizontal micro-stripe texture and short sleeves. Understated luxury that pairs flawlessly with dark trousers or casual wear.",
-    sizeChart: OFFICIAL_SIZE_CHART
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "For the love of vintage. Carefully selected shirts that bring timeless fashion back to life.",
+    "id": "uv-1786737038310",
+    "image": "images/prod-uv-1786737038310.jpg",
+    "name": "Vintage shirt-UV18",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Elevate your casual look with the perfect polka dots vintage shirt.",
+    "id": "uv-1786737139029",
+    "image": "images/prod-uv-1786737139029.jpg",
+    "name": "Vintage shirt - UV17",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Rare feel. Classic look. Your wardrobe deserves a vintage statement piece.",
+    "id": "uv-1786737473869",
+    "image": "images/prod-uv-1786737473869.jpg",
+    "name": "Vintage shirts- UV16",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Vintage, but never out of style. A classic piece with character, made for effortless everyday looks.",
+    "id": "uv-1786739827465",
+    "image": "images/prod-uv-1786739827465.jpg",
+    "name": "Vintage shirt - UV15",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Vintage, but never out of style. A classic piece with character, made for effortless everyday looks.",
+    "id": "uv-1786739952497",
+    "image": "images/prod-uv-1786739952497.jpg",
+    "name": "Vintage shirt - UV14",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Made for those who appreciate the classics. Unique prints, timeless appeal, effortless style.",
+    "id": "uv-1786740208476",
+    "image": "images/prod-uv-1786740208476.jpg",
+    "name": "Vintage shirt -UV13",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Old-school charm, modern-day style. Stand out in a vintage shirt that speaks for itself.",
+    "id": "uv-1786740357006",
+    "image": "images/prod-uv-1786740357006.jpg",
+    "name": "Vintage shirts - UV11",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "For the love of vintage. Carefully selected polka dots shirts that bring timeless fashion back to life.",
+    "id": "uv-1786740567264",
+    "image": "images/prod-uv-1786740567264.jpg",
+    "name": "Vintage shirt-UV118",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Rare feel. Classic look. Your wardrobe deserves a vintage statement piece.",
+    "id": "uv-1786740950061",
+    "image": "images/prod-uv-1786740950061.jpg",
+    "name": "Vintage shirt-UV117",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "A little nostalgia, a lot of style. Discover vintage pieces that bring personality to every outfit.",
+    "id": "uv-1786741123081",
+    "image": "images/prod-uv-1786741123081.jpg",
+    "name": "Vintage shirt - UV115",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Classic threads, unforgettable style. Elevate your casual look with the perfect vintage shirt.",
+    "id": "uv-1786741286828",
+    "image": "images/prod-uv-1786741286828.jpg",
+    "name": "Vintage shirt-UV114",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Classic threads, unforgettable style. Elevate your casual look with the perfect vintage shirt.",
+    "id": "uv-1786741385314",
+    "image": "images/prod-uv-1786741385314.jpg",
+    "name": "Vintage shirt - UV112",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Vintage Shirts",
+    "description": "Classic threads, unforgettable style. Elevate your casual look with the perfect vintage shirt.",
+    "id": "uv-1786741443319",
+    "image": "images/prod-uv-1786741443319.jpg",
+    "name": "Vintage shirt-UV11",
+    "price": 7500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 2
+  },
+  {
+    "badge": "Sold Out",
+    "category": "Clothes",
+    "description": "A bold, artistic vintage-style short-sleeve shirt with an eye-catching black, white, and gold brushstroke pattern. Crafted from smooth, lightweight fabric for maximum comfort and style.",
+    "id": "uv-2",
+    "image": "images/shirt-vintage-print.jpg",
+    "name": "Vintage Shirt \u2014 Abstract Gold & Black Print",
+    "price": 7500,
+    "rating": 4.9,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 0
+  },
+  {
+    "badge": "Hot Deal",
+    "category": "Clothes",
+    "description": "Rich chocolate-brown open-knit shirt with classic Cuban lapels and custom pearlized buttons. Warm, elegant, and versatile \u2014 a staple piece for high-fashion casual styling.",
+    "id": "uv-3",
+    "image": "images/shirt-brown-knit.jpg",
+    "name": "Knit Shirt \u2014 Chocolate Brown",
+    "price": 12500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 18
+  },
+  {
+    "badge": "New Arrival",
+    "category": "Clothes",
+    "description": "Vibrant ocean teal and deep black African-inspired swirl pattern shirt. Features a tailored resort fit that makes a powerful fashion statement wherever you go.",
+    "id": "uv-4",
+    "image": "images/shirt-teal-print.jpg",
+    "name": "Vintage Shirt \u2014 Teal Tribal Swirl",
+    "price": 7500,
+    "rating": 4.9,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 3
+  },
+  {
+    "badge": "Available",
+    "category": "Clothes",
+    "description": "Refined beige open-knit shirt with horizontal micro-stripe texture and short sleeves. Understated luxury that pairs flawlessly with dark trousers or casual wear.",
+    "id": "uv-5",
+    "image": "images/shirt-beige-knit.jpg",
+    "name": "Knit Shirt \u2014 Warm Beige Stripe",
+    "price": 12500,
+    "rating": 5,
+    "sizeChart": {
+      "measurements": [
+        {
+          "chest": "40\"",
+          "length": "27\"",
+          "shoulder": "17\"",
+          "size": "S",
+          "sleeve": "8\""
+        },
+        {
+          "chest": "42\"",
+          "length": "28\"",
+          "shoulder": "18\"",
+          "size": "M",
+          "sleeve": "8.5\""
+        },
+        {
+          "chest": "44\"",
+          "length": "29\"",
+          "shoulder": "19\"",
+          "size": "L",
+          "sleeve": "9\""
+        },
+        {
+          "chest": "46\"",
+          "length": "30\"",
+          "shoulder": "20\"",
+          "size": "XL",
+          "sleeve": "9.5\""
+        },
+        {
+          "chest": "48\"",
+          "length": "31\"",
+          "shoulder": "21\"",
+          "size": "2XL",
+          "sleeve": "10\""
+        }
+      ],
+      "unit": "inches"
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 10
   }
 ];
 
