@@ -187,17 +187,19 @@ class AdminManager {
                   <td style="font-size:0.8rem; max-width:200px; color:var(--grey-light);">${itemsStr || '—'}</td>
                   <td class="admin-price" style="${isCancelled ? 'text-decoration:line-through; color:var(--grey-dim);' : ''}">${App.formatMoney(o.total || 0)}</td>
                   <td>
-                    <span class="badge" style="${badgeStyle} font-size:0.6rem; text-transform:uppercase;">
-                      ${status}
-                    </span>
+                    <select class="order-status-select" onchange="AdminManager.setOrderStatus('${o.id}', this.value)" style="border-color:${isCancelled ? '#e63946' : 'var(--border-gold)'};">
+                      <option value="Payment Pending Confirmation" ${status === 'Payment Pending Confirmation' ? 'selected' : ''}>🟡 Payment Pending</option>
+                      <option value="Payment Confirmed" ${status === 'Payment Confirmed' ? 'selected' : ''}>🟢 Payment Confirmed</option>
+                      <option value="Processing / Packaging" ${status === 'Processing / Packaging' ? 'selected' : ''}>📦 Packaging / Processing</option>
+                      <option value="Dispatched" ${status === 'Dispatched' ? 'selected' : ''}>🚚 Dispatched / In Transit</option>
+                      <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>✅ Delivered</option>
+                      <option value="Cancelled by Customer" ${isCancelled ? 'selected' : ''}>❌ Cancelled</option>
+                    </select>
                   </td>
                   <td>
-                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                       ${cleanPhone && !isCancelled ? `<a href="${waLink}" target="_blank" class="btn btn-gold btn-sm" style="padding:4px 10px; font-size:0.72rem; background:#25D366; color:#fff;" title="Chat customer on WhatsApp"><i class="fa-brands fa-whatsapp"></i> Chat</a>` : ''}
-                      <button class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:0.72rem;" onclick="AdminManager.toggleOrderStatus('${o.id}')" title="Change Order Status">
-                        <i class="fa-solid fa-rotate"></i>
-                      </button>
-                      <button class="del-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="AdminManager.deleteOrder('${o.id}')" title="Delete Unsuccessful Order">
+                      <button class="del-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="AdminManager.deleteOrder('${o.id}')" title="Delete Order from records">
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
                     </div>
@@ -278,26 +280,33 @@ class AdminManager {
     }
   }
 
+  static setOrderStatus(refId, newStatus) {
+    if (typeof OrdersAPI !== "undefined") {
+      OrdersAPI.updateOrderStatus(refId, newStatus).then(() => {
+        App.showToast(`Order ${refId} status updated to "${newStatus}"`);
+        this.initAdminDashboard();
+      });
+    } else {
+      const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+      const idx = orders.findIndex(o => o.id === refId);
+      if (idx !== -1) {
+        orders[idx].status = newStatus;
+        localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+        App.showToast(`Order ${refId} status updated to "${newStatus}"`);
+        this.initAdminDashboard();
+      }
+    }
+  }
+
   static toggleOrderStatus(refId) {
     const orders = (typeof OrdersAPI !== "undefined") ? OrdersAPI.getOrders() : JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
     const idx = orders.findIndex(o => o.id === refId);
     if (idx !== -1) {
-      const statuses = ['Payment Pending Confirmation', 'Payment Confirmed', 'Dispatched', 'Cancelled by Customer'];
+      const statuses = ['Payment Pending Confirmation', 'Payment Confirmed', 'Processing / Packaging', 'Dispatched', 'Delivered', 'Cancelled by Customer'];
       const currentIdx = statuses.indexOf(orders[idx].status);
       const nextIdx = (currentIdx + 1) % statuses.length;
       const newStatus = statuses[nextIdx];
-
-      if (typeof OrdersAPI !== "undefined") {
-        OrdersAPI.updateOrderStatus(refId, newStatus).then(() => {
-          App.showToast(`Order ${refId} status set to "${newStatus}"`);
-          this.initAdminDashboard();
-        });
-      } else {
-        orders[idx].status = newStatus;
-        localStorage.setItem("uv_orders_history", JSON.stringify(orders));
-        App.showToast(`Order ${refId} status set to "${newStatus}"`);
-        this.initAdminDashboard();
-      }
+      this.setOrderStatus(refId, newStatus);
     }
   }
 
