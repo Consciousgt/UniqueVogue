@@ -1,7 +1,8 @@
 /* ==========================================================================
-   UNIFIED VOGUE — UNIVERSAL REAL-TIME CATALOG ENGINE
-   Supports: Admin Instant Product Publishing, Live Editing, & Full Product Deletion
-   Multi-Cloud Redundant Sync: Firebase Realtime Database + High-Speed Cloud Storage + Local Storage
+   UNIFIED VOGUE — UNIVERSAL REAL-TIME FIREBASE STORE ENGINE
+   • Products Catalog Live Sync across ALL customer devices
+   • Live Customer Orders & Sales Tracking directly to Admin Dashboard
+   • Multi-Cloud Fallback & Redundancy
    ========================================================================== */
 
 /* ── Firebase Configuration ─────────────────────────────────────────────── */
@@ -25,13 +26,13 @@ try {
     db = firebase.database();
   }
 } catch (e) {
-  console.warn("[Unified Vogue] Firebase init note:", e.message);
+  console.warn("[Unified Vogue] Firebase init notice:", e.message);
 }
 
 const CATALOG_REF = "catalog";
-const DELETED_REF = "deleted_ids";
-const DB_KEY = "uv_vogue_catalog_v14";
-const DELETED_KEY = "uv_vogue_deleted_v14";
+const ORDERS_REF = "orders";
+const DB_KEY = "uv_vogue_catalog_v15";
+const ORDERS_KEY = "uv_orders_history";
 const CLOUD_BIN_URL = "https://extendsclass.com/api/json-storage/bin/acfdddb";
 
 /* ── Permanent Official Standard Size Chart (Inches) ─────────────────────── */
@@ -115,52 +116,17 @@ const OFFICIAL_CATALOG = [
   }
 ];
 
-/* ── Internal Helpers ─────────────────────────────────────────────────────── */
+/* ── Product Helpers ──────────────────────────────────────────────────────── */
 function _attachSizeChart(p) {
   return { ...p, sizeChart: OFFICIAL_SIZE_CHART };
 }
 
-function _getDeletedIds() {
-  try {
-    const raw = localStorage.getItem(DELETED_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
-}
+function _snapshotToProductArray(data) {
+  if (!data || typeof data !== "object") return OFFICIAL_CATALOG.map(_attachSizeChart);
+  const items = Object.values(data).filter(p => p && p.id).map(_attachSizeChart);
+  if (items.length === 0) return OFFICIAL_CATALOG.map(_attachSizeChart);
 
-function _markDeletedId(id) {
-  try {
-    const list = _getDeletedIds();
-    if (!list.includes(id)) {
-      list.push(id);
-      localStorage.setItem(DELETED_KEY, JSON.stringify(list));
-    }
-  } catch (e) {}
-}
-
-function _unmarkDeletedId(id) {
-  try {
-    let list = _getDeletedIds();
-    list = list.filter(item => item !== id);
-    localStorage.setItem(DELETED_KEY, JSON.stringify(list));
-  } catch (e) {}
-}
-
-function _filterDeleted(products) {
-  if (!Array.isArray(products)) return [];
-  const deleted = _getDeletedIds();
-  return products.filter(p => p && p.id && !deleted.includes(p.id));
-}
-
-function _snapshotToArray(data) {
-  if (!data || typeof data !== "object") return [];
-  const items = Object.values(data).map(_attachSizeChart);
-  const filtered = _filterDeleted(items);
-  if (filtered.length === 0) {
-    return OFFICIAL_CATALOG.map(_attachSizeChart);
-  }
-  return filtered.sort((a, b) => {
+  return items.sort((a, b) => {
     const aNew = a.id && a.id.length > 6;
     const bNew = b.id && b.id.length > 6;
     if (aNew && !bNew) return -1;
@@ -171,9 +137,8 @@ function _snapshotToArray(data) {
 }
 
 function _cacheProducts(products) {
-  const filtered = _filterDeleted(products);
-  if (filtered.length > 0) {
-    localStorage.setItem(DB_KEY, JSON.stringify(filtered));
+  if (Array.isArray(products) && products.length > 0) {
+    localStorage.setItem(DB_KEY, JSON.stringify(products));
   }
 }
 
@@ -188,7 +153,7 @@ async function _pushToCloudBin(products) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ProductsAPI — Universal Multi-Cloud Synchronized Store Engine
+   ProductsAPI — Universal Multi-Device Catalog Engine
    ═══════════════════════════════════════════════════════════════════════════ */
 class ProductsAPI {
 
@@ -196,98 +161,71 @@ class ProductsAPI {
     return OFFICIAL_SIZE_CHART;
   }
 
-  /* ── Read Products (Guaranteed to return products, instant, filters deleted) ── */
+  /* ── Read Products (Instant, synchronous, non-empty guaranteed) ─────── */
   static getProducts() {
     try {
       const stored = localStorage.getItem(DB_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const filtered = _filterDeleted(parsed);
-          if (filtered.length > 0) {
-            return filtered.map(_attachSizeChart);
-          }
+          return parsed.map(_attachSizeChart);
         }
       }
     } catch (e) {}
 
-    const defaultFiltered = _filterDeleted(OFFICIAL_CATALOG);
-    if (defaultFiltered.length > 0) {
-      return defaultFiltered.map(_attachSizeChart);
-    }
     return OFFICIAL_CATALOG.map(_attachSizeChart);
   }
 
   static getProductById(id) {
-    const deleted = _getDeletedIds();
-    if (deleted.includes(id)) return null;
     const p = this.getProducts().find(p => p.id === id);
     return p ? _attachSizeChart(p) : null;
   }
 
   /* ── Real-Time Live Subscription ─────────────────────────────────────── */
   static subscribeToLiveCatalog(callback) {
-    // 1. Send initial data immediately
+    // 1. Initial cached render
     const initial = ProductsAPI.getProducts();
     callback(initial);
 
-    // 2. Listen to Firebase Realtime Database
+    // 2. Listen to Firebase
     if (db) {
       try {
         const catalogRef = db.ref(CATALOG_REF);
         catalogRef.on("value", (snapshot) => {
           const data = snapshot.val();
           if (data && typeof data === "object" && Object.keys(data).length > 0) {
-            const products = _snapshotToArray(data);
-            if (products.length > 0) {
-              _cacheProducts(products);
-              window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
-              callback(products);
-            }
+            const products = _snapshotToProductArray(data);
+            _cacheProducts(products);
+            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
+            callback(products);
           } else {
             // Seed Firebase if empty
             ProductsAPI.resetCatalog().then(prods => callback(prods));
           }
         }, (err) => {
-          console.warn("[Unified Vogue] Firebase stream notice:", err.message);
+          console.warn("[Unified Vogue] Firebase catalog stream notice:", err.message);
           callback(ProductsAPI.getProducts());
-        });
-
-        // Sync deleted IDs from Firebase
-        db.ref(DELETED_REF).on("value", (snap) => {
-          const deletedMap = snap.val();
-          if (deletedMap && typeof deletedMap === "object") {
-            Object.keys(deletedMap).forEach(delId => _markDeletedId(delId));
-            const fresh = ProductsAPI.getProducts();
-            _cacheProducts(fresh);
-            callback(fresh);
-          }
         });
       } catch (e) {}
     }
 
-    // 3. Background Cloud Storage Bin Sync
+    // 3. Fallback Cloud Storage Bin Sync
     fetch(`${CLOUD_BIN_URL}?_t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(raw => {
         const remoteProducts = Array.isArray(raw) ? raw : (raw && raw.data ? (typeof raw.data === 'string' ? JSON.parse(raw.data) : raw.data) : null);
         if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
-          const standardized = _snapshotToArray(remoteProducts);
-          if (standardized.length > 0) {
-            _cacheProducts(standardized);
-            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
-            callback(standardized);
-          }
+          const standardized = _snapshotToProductArray(remoteProducts);
+          _cacheProducts(standardized);
+          window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
+          callback(standardized);
         }
       })
       .catch(() => {});
 
     return () => {
       if (db) {
-        try {
-          db.ref(CATALOG_REF).off("value");
-          db.ref(DELETED_REF).off("value");
-        } catch (e) {}
+        try { db.ref(CATALOG_REF).off("value"); } catch (e) {}
       }
     };
   }
@@ -295,8 +233,6 @@ class ProductsAPI {
   /* ── ADD PRODUCT (Admin) ─────────────────────────────────────────────── */
   static async addProduct(productData) {
     const id = "uv-" + Date.now();
-    _unmarkDeletedId(id);
-
     const newProd = _attachSizeChart({
       id,
       rating: 5.0,
@@ -353,26 +289,22 @@ class ProductsAPI {
 
   /* ── DELETE PRODUCT (Admin Delete Sold Out / Unavailable Items) ───────── */
   static async deleteProduct(id) {
-    // 1. Permanently blacklist ID
-    _markDeletedId(id);
-
-    // 2. Remove from local catalog array immediately
+    // 1. Remove from local catalog array immediately
     let products = ProductsAPI.getProducts();
     products = products.filter(p => p.id !== id);
     _cacheProducts(products);
     window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
 
-    // 3. Sync deletion to Firebase
+    // 2. Sync deletion to Firebase
     if (db) {
       try {
         await db.ref(`${CATALOG_REF}/${id}`).remove();
-        await db.ref(`${DELETED_REF}/${id}`).set(true);
       } catch (e) {
         console.warn("[Unified Vogue] Firebase delete notice:", e.message);
       }
     }
 
-    // 4. Sync updated catalog array to Cloud Storage Bin
+    // 3. Sync updated catalog array to Cloud Storage Bin
     _pushToCloudBin(products);
 
     return true;
@@ -380,7 +312,6 @@ class ProductsAPI {
 
   /* ── RESET CATALOG to Official 5 Shirts ──────────────────────────────── */
   static async resetCatalog() {
-    localStorage.removeItem(DELETED_KEY);
     const obj = {};
     OFFICIAL_CATALOG.forEach(p => { obj[p.id] = _attachSizeChart(p); });
 
@@ -390,7 +321,6 @@ class ProductsAPI {
     if (db) {
       try {
         await db.ref(CATALOG_REF).set(obj);
-        await db.ref(DELETED_REF).remove();
       } catch (e) {}
     }
 
@@ -404,31 +334,13 @@ class ProductsAPI {
       try {
         const snap = await db.ref(CATALOG_REF).once("value");
         if (snap.exists()) {
-          const products = _snapshotToArray(snap.val());
-          if (products.length > 0) {
-            _cacheProducts(products);
-            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
-            return products;
-          }
+          const products = _snapshotToProductArray(snap.val());
+          _cacheProducts(products);
+          window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: products }));
+          return products;
         }
       } catch (e) {}
     }
-
-    try {
-      const res = await fetch(`${CLOUD_BIN_URL}?_t=${Date.now()}`, { cache: 'no-store' });
-      if (res.ok) {
-        const raw = await res.json();
-        const remoteProducts = Array.isArray(raw) ? raw : (raw && raw.data ? (typeof raw.data === 'string' ? JSON.parse(raw.data) : raw.data) : null);
-        if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
-          const standardized = _snapshotToArray(remoteProducts);
-          if (standardized.length > 0) {
-            _cacheProducts(standardized);
-            window.dispatchEvent(new CustomEvent("uv_catalog_synced", { detail: standardized }));
-            return standardized;
-          }
-        }
-      }
-    } catch (e) {}
 
     return ProductsAPI.getProducts();
   }
@@ -438,7 +350,139 @@ class ProductsAPI {
   static async syncToCloud() { return true; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   OrdersAPI — Universal Live Orders & Sales Tracking Engine
+   ═══════════════════════════════════════════════════════════════════════════ */
+class OrdersAPI {
+
+  /* ── Get Orders from local storage ───────────────────────────────────── */
+  static getOrders() {
+    try {
+      const stored = localStorage.getItem(ORDERS_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  static _cacheOrders(orders) {
+    if (Array.isArray(orders)) {
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    }
+  }
+
+  /* ── Live Orders Subscription (Admin Dashboard) ─────────────────────── */
+  static subscribeToLiveOrders(callback) {
+    // 1. Initial cached render
+    callback(OrdersAPI.getOrders());
+
+    // 2. Listen to Firebase Realtime Database
+    if (db) {
+      try {
+        const ordersRef = db.ref(ORDERS_REF);
+        ordersRef.on("value", (snapshot) => {
+          const data = snapshot.val();
+          if (data && typeof data === "object") {
+            const orders = Object.values(data).sort((a, b) => {
+              const dateA = a.timestamp || 0;
+              const dateB = b.timestamp || 0;
+              return dateB - dateA;
+            });
+            OrdersAPI._cacheOrders(orders);
+            callback(orders);
+          } else {
+            OrdersAPI._cacheOrders([]);
+            callback([]);
+          }
+        }, (err) => {
+          console.warn("[Unified Vogue] Orders live stream notice:", err.message);
+          callback(OrdersAPI.getOrders());
+        });
+      } catch (e) {}
+    }
+
+    return () => {
+      if (db) {
+        try { db.ref(ORDERS_REF).off("value"); } catch (e) {}
+      }
+    };
+  }
+
+  /* ── Create New Order (Checkout) ─────────────────────────────────────── */
+  static async createOrder(orderRecord) {
+    const fullOrder = {
+      timestamp: Date.now(),
+      ...orderRecord
+    };
+
+    // 1. Update local storage immediately
+    const existing = OrdersAPI.getOrders();
+    existing.unshift(fullOrder);
+    OrdersAPI._cacheOrders(existing);
+
+    // 2. Sync to Firebase
+    if (db) {
+      try {
+        await db.ref(`${ORDERS_REF}/${fullOrder.id}`).set(fullOrder);
+      } catch (e) {
+        console.warn("[Unified Vogue] Firebase order write notice:", e.message);
+      }
+    }
+
+    return fullOrder;
+  }
+
+  /* ── Update Order Status (Admin) ─────────────────────────────────────── */
+  static async updateOrderStatus(orderId, newStatus) {
+    const orders = OrdersAPI.getOrders();
+    const idx = orders.findIndex(o => o.id === orderId);
+    if (idx !== -1) {
+      orders[idx].status = newStatus;
+      OrdersAPI._cacheOrders(orders);
+    }
+
+    if (db) {
+      try {
+        await db.ref(`${ORDERS_REF}/${orderId}`).update({ status: newStatus });
+      } catch (e) {}
+    }
+
+    return orders;
+  }
+
+  /* ── Delete Single Order (Admin) ─────────────────────────────────────── */
+  static async deleteOrder(orderId) {
+    let orders = OrdersAPI.getOrders();
+    orders = orders.filter(o => o.id !== orderId);
+    OrdersAPI._cacheOrders(orders);
+
+    if (db) {
+      try {
+        await db.ref(`${ORDERS_REF}/${orderId}`).remove();
+      } catch (e) {}
+    }
+
+    return orders;
+  }
+
+  /* ── Clear All Orders (Admin) ────────────────────────────────────────── */
+  static async clearAllOrders() {
+    OrdersAPI._cacheOrders([]);
+
+    if (db) {
+      try {
+        await db.ref(ORDERS_REF).remove();
+      } catch (e) {}
+    }
+
+    return [];
+  }
+}
+
 // Expose globally for all pages
 window.ProductsAPI = ProductsAPI;
+window.OrdersAPI = OrdersAPI;
 window.OFFICIAL_SIZE_CHART = OFFICIAL_SIZE_CHART;
 window.OFFICIAL_CATALOG = OFFICIAL_CATALOG;

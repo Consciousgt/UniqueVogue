@@ -42,7 +42,7 @@ class CheckoutManager {
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
       `I have transferred ${App.formatMoney(subtotal)} into Opay (Acc: 6584992459 - CHIOMA PEACE OKAFOR). Please confirm receipt and let me know the delivery fee & dispatch timeline. Thank you!`;
 
-    // Save order record for Admin portal
+    // Save order record to live Firebase & local storage via OrdersAPI
     const orderRecord = {
       id: refCode,
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -54,9 +54,13 @@ class CheckoutManager {
       status: 'Payment Pending Confirmation'
     };
 
-    const existingOrders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
-    existingOrders.unshift(orderRecord);
-    localStorage.setItem("uv_orders_history", JSON.stringify(existingOrders));
+    if (typeof OrdersAPI !== "undefined") {
+      OrdersAPI.createOrder(orderRecord);
+    } else {
+      const existingOrders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+      existingOrders.unshift(orderRecord);
+      localStorage.setItem("uv_orders_history", JSON.stringify(existingOrders));
+    }
 
     // Clear shopping bag after order submission
     CartManager.saveCart([]);

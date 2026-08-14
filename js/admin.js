@@ -1,29 +1,40 @@
 /* ==========================================================================
    UNIFIED VOGUE — STORE OWNER ADMIN DASHBOARD MODULE
+   Live Metrics, Real-Time Product Catalog & Customer Order Management
    ========================================================================== */
 
 class AdminManager {
-  static _unsubscribe = null;
+  static _catalogSub = null;
+  static _ordersSub = null;
+  static _activeFilter = 'ALL';
 
   static initAdminDashboard() {
     this.renderMetrics();
     this.renderProductsTable();
     this.renderOrdersTable();
 
-    // Subscribe to live catalog so admin table refreshes automatically when any device makes a change
-    if (!this._unsubscribe) {
-      this._unsubscribe = ProductsAPI.subscribeToLiveCatalog((products) => {
+    // 1. Live Products Subscription
+    if (!this._catalogSub) {
+      this._catalogSub = ProductsAPI.subscribeToLiveCatalog((products) => {
         this.renderMetrics();
         this.renderProductsTable(products);
+      });
+    }
+
+    // 2. Live Orders Subscription
+    if (!this._ordersSub) {
+      this._ordersSub = OrdersAPI.subscribeToLiveOrders((orders) => {
+        this.renderMetrics();
+        this.renderOrdersTable(this._activeFilter, orders);
       });
     }
   }
 
   static renderMetrics() {
     const products = ProductsAPI.getProducts();
-    const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+    const orders = (typeof OrdersAPI !== "undefined") ? OrdersAPI.getOrders() : JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
 
-    // Only count revenue for non-cancelled orders
+    // Count revenue for non-cancelled orders
     const activeOrders = orders.filter(o => o.status !== 'Cancelled by Customer' && o.status !== 'Cancelled / Failed');
     const totalRevenue = activeOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
@@ -41,7 +52,7 @@ class AdminManager {
     if (!tbody) return;
 
     const products = (Array.isArray(productList) && productList.length > 0) ? productList : ProductsAPI.getProducts();
-    if (products.length === 0) {
+    if (!products || products.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" class="empty-tbl">No products in catalog. Click "Upload New Product" to add.</td></tr>`;
       return;
     }
@@ -96,11 +107,12 @@ class AdminManager {
     `}).join('');
   }
 
-  static renderOrdersTable(filterStatus = 'ALL') {
+  static renderOrdersTable(filterStatus = 'ALL', orderList = null) {
     const container = document.getElementById("ordersContainer");
     if (!container) return;
 
-    const allOrders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+    this._activeFilter = filterStatus;
+    const allOrders = (Array.isArray(orderList)) ? orderList : (typeof OrdersAPI !== "undefined" ? OrdersAPI.getOrders() : JSON.parse(localStorage.getItem("uv_orders_history") || "[]"));
 
     let orders = allOrders;
     if (filterStatus === 'CANCELLED') {
@@ -113,7 +125,7 @@ class AdminManager {
       container.innerHTML = `
         <div class="empty-tbl">
           <i class="fa-regular fa-file-lines" style="font-size:2.2rem; display:block; margin-bottom:10px; color:var(--gold);"></i>
-          No customer orders recorded yet.<br>When customers submit orders via checkout, they will appear here live.
+          No customer orders recorded yet.<br>When customers submit orders via checkout, they will appear here live in real-time.
         </div>`;
       return;
     }
@@ -217,23 +229,25 @@ class AdminManager {
       return;
     }
 
-    await ProductsAPI.updateProduct(id, { price: priceNum, stock: stockNum });
-    App.showToast(`Updated "${prod.name}" across all devices!`);
-    this.initAdminDashboard();
+    ProductsAPI.updateProduct(id, { price: priceNum, stock: stockNum }).then(() => {
+      App.showToast(`Updated "${prod.name}" across all devices!`);
+      this.initAdminDashboard();
+    });
   }
 
-  static async markSoldOut(id) {
+  static markSoldOut(id) {
     const prod = ProductsAPI.getProductById(id);
     if (!prod) return;
 
     if (confirm(`Mark "${prod.name}" as SOLD OUT?\n\nThis sets the stock to 0 and updates the storefront across all customer devices immediately.`)) {
-      await ProductsAPI.updateProduct(id, { stock: 0, badge: "Sold Out" });
-      App.showToast(`"${prod.name}" is now marked as Sold Out.`);
-      this.initAdminDashboard();
+      ProductsAPI.updateProduct(id, { stock: 0, badge: "Sold Out" }).then(() => {
+        App.showToast(`"${prod.name}" is now marked as Sold Out.`);
+        this.initAdminDashboard();
+      });
     }
   }
 
-  static async restockProd(id) {
+  static restockProd(id) {
     const prod = ProductsAPI.getProductById(id);
     if (!prod) return;
 
@@ -246,45 +260,74 @@ class AdminManager {
       return;
     }
 
-    await ProductsAPI.updateProduct(id, { stock: qty, badge: "Available" });
-    App.showToast(`"${prod.name}" restocked with ${qty} units!`);
-    this.initAdminDashboard();
+    ProductsAPI.updateProduct(id, { stock: qty, badge: "Available" }).then(() => {
+      App.showToast(`"${prod.name}" restocked with ${qty} units!`);
+      this.initAdminDashboard();
+    });
   }
 
-  static async deleteProd(id) {
+  static deleteProd(id) {
     const prod = ProductsAPI.getProductById(id);
     const prodName = prod ? prod.name : "this product";
 
     if (confirm(`Delete "${prodName}" from the store catalog?\n\n⚠️ This will permanently remove this item from the store across ALL devices and customers will no longer see it.`)) {
-      await ProductsAPI.deleteProduct(id);
-      App.showToast(`"${prodName}" has been deleted from the catalog across all devices`);
-      this.initAdminDashboard();
+      ProductsAPI.deleteProduct(id).then(() => {
+        App.showToast(`"${prodName}" has been deleted from the catalog across all devices`);
+        this.initAdminDashboard();
+      });
     }
   }
 
   static toggleOrderStatus(refId) {
-    const orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+    const orders = (typeof OrdersAPI !== "undefined") ? OrdersAPI.getOrders() : JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
     const idx = orders.findIndex(o => o.id === refId);
     if (idx !== -1) {
       const statuses = ['Payment Pending Confirmation', 'Payment Confirmed', 'Dispatched', 'Cancelled by Customer'];
       const currentIdx = statuses.indexOf(orders[idx].status);
       const nextIdx = (currentIdx + 1) % statuses.length;
-      orders[idx].status = statuses[nextIdx];
+      const newStatus = statuses[nextIdx];
 
-      localStorage.setItem("uv_orders_history", JSON.stringify(orders));
-      App.showToast(`Order ${refId} status set to "${orders[idx].status}"`);
-      this.initAdminDashboard();
+      if (typeof OrdersAPI !== "undefined") {
+        OrdersAPI.updateOrderStatus(refId, newStatus).then(() => {
+          App.showToast(`Order ${refId} status set to "${newStatus}"`);
+          this.initAdminDashboard();
+        });
+      } else {
+        orders[idx].status = newStatus;
+        localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+        App.showToast(`Order ${refId} status set to "${newStatus}"`);
+        this.initAdminDashboard();
+      }
     }
   }
 
   static deleteOrder(refId) {
     if (!confirm(`Delete order "${refId}" from store records?\nThis will remove it from the sales log.`)) return;
 
-    let orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
-    orders = orders.filter(o => o.id !== refId);
-    localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+    if (typeof OrdersAPI !== "undefined") {
+      OrdersAPI.deleteOrder(refId).then(() => {
+        App.showToast(`Order ${refId} deleted from records`);
+        this.initAdminDashboard();
+      });
+    } else {
+      let orders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
+      orders = orders.filter(o => o.id !== refId);
+      localStorage.setItem("uv_orders_history", JSON.stringify(orders));
+      App.showToast(`Order ${refId} deleted from records`);
+      this.initAdminDashboard();
+    }
+  }
 
-    App.showToast(`Order ${refId} deleted from records`);
-    this.initAdminDashboard();
+  static clearAllOrders() {
+    if (typeof OrdersAPI !== "undefined") {
+      OrdersAPI.clearAllOrders().then(() => {
+        App.showToast("Orders history cleared");
+        this.initAdminDashboard();
+      });
+    } else {
+      localStorage.setItem("uv_orders_history", "[]");
+      App.showToast("Orders history cleared");
+      this.initAdminDashboard();
+    }
   }
 }

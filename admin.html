@@ -576,9 +576,7 @@
 
     function confirmClearOrders() {
       if (confirm("Are you sure you want to clear all customer orders history?")) {
-        localStorage.setItem("uv_orders_history", "[]");
-        App.showToast("Orders history cleared");
-        AdminManager.initAdminDashboard();
+        AdminManager.clearAllOrders();
       }
     }
   </script>
