@@ -213,15 +213,30 @@
       }
     });
 
-    function handleCheckoutSubmit(e) {
+    async function handleCheckoutSubmit(e) {
       e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing Order &amp; Connecting to WhatsApp...';
+      }
+
       const formData = {
         name: document.getElementById('custName').value.trim(),
         phone: document.getElementById('custPhone').value.trim(),
         city: document.getElementById('custCity').value.trim(),
         address: document.getElementById('custAddress').value.trim()
       };
-      CheckoutManager.submitOrder(formData);
+
+      try {
+        await CheckoutManager.submitOrder(formData);
+      } catch (err) {
+        console.error(err);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirm Order &amp; Send WhatsApp Receipt';
+        }
+      }
     }
   </script>
 </body>

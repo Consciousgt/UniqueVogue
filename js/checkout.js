@@ -1,5 +1,6 @@
 /* ==========================================================================
    UNIFIED VOGUE — CHECKOUT & WHATSAPP RECEIPT ENGINE
+   Saves orders to Firebase Realtime Database in real-time
    ========================================================================== */
 
 class CheckoutManager {
@@ -7,7 +8,7 @@ class CheckoutManager {
     return "UV-" + Math.floor(100000 + Math.random() * 900000) + "-PAY";
   }
 
-  static submitOrder(formData) {
+  static async submitOrder(formData) {
     const cart = CartManager.getCart();
     if (cart.length === 0) {
       App.showToast("Your shopping bag is empty!", "error");
@@ -46,6 +47,7 @@ class CheckoutManager {
     const orderRecord = {
       id: refCode,
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      timestamp: Date.now(),
       customer: formData,
       items: cart,
       subtotal: subtotal,
@@ -54,8 +56,13 @@ class CheckoutManager {
       status: 'Payment Pending Confirmation'
     };
 
+    // Save to Firebase (await so it is safely written before redirecting)
     if (typeof OrdersAPI !== "undefined") {
-      OrdersAPI.createOrder(orderRecord);
+      try {
+        await OrdersAPI.createOrder(orderRecord);
+      } catch (e) {
+        console.warn("[Unified Vogue] Order write note:", e);
+      }
     } else {
       const existingOrders = JSON.parse(localStorage.getItem("uv_orders_history") || "[]");
       existingOrders.unshift(orderRecord);
