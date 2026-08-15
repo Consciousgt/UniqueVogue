@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://consciousgt.github.io/UniqueVogue/sitemap.xml
