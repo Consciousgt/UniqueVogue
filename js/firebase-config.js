@@ -36,7 +36,7 @@ _getDb();
 
 const CATALOG_REF = "catalog";
 const ORDERS_REF = "orders";
-const DB_KEY = "uv_vogue_catalog_v16";
+const DB_KEY = "uv_vogue_catalog_v17";
 const ORDERS_KEY = "uv_orders_history";
 const FIREBASE_REST_BASE = "https://unifiedvogue-b8a97-default-rtdb.firebaseio.com";
 const CLOUD_BIN_URL = "https://extendsclass.com/api/json-storage/bin/acfdddb";
